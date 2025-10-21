@@ -175,44 +175,31 @@
             transform: translateY(0);
         }
 
-        #profile-container {
+        #header-left-group {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            background-color: var(--surface-color); /* Solid background */
-            border: 1px solid var(--border-color); /* Standard border */
-            border-radius: 12px;
-            color: var(--text-color);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15); /* Standard shadow */
-            position: relative;
-            overflow: hidden;
-            height: 36px;
-            cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
-        }
-        #profile-container:hover {
-            background-color: #27272a; /* Solid hover */
-            border-color: var(--secondary-text-color);
+            gap: 12px;
         }
 
-        #profile-pic-container {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            overflow: hidden;
-            flex-shrink: 0;
+        #model-switcher-trigger {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
         }
-        #profile-pic-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        #model-switcher-trigger:hover {
+            background-color: #27272a;
+            border-color: var(--secondary-text-color);
         }
-        #profile-text {
+        #current-model-name {
             font-size: 0.9rem;
             font-weight: 600;
             color: var(--text-color);
-            white-space: nowrap;
         }
 
         .header-control-btn {
@@ -960,21 +947,14 @@
 
 
         .artifact-container {
-            background: var(--artifact-bg-light);
-            -webkit-backdrop-filter: blur(7px) saturate(140%); 
-            backdrop-filter: blur(7px) saturate(140%);
-            border: 1px solid var(--artifact-border-light);
-            border-radius: 10px;  
-            margin-top: 8px; margin-bottom: 7px; overflow: hidden;  
-            box-shadow: var(--artifact-shadow-light);
+            background-color: var(--surface-color); /* Solid background */
+            border: 1px solid var(--border-color); /* Standard border */
+            border-radius: 10px;
+            margin-top: 8px; margin-bottom: 7px; overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Standard shadow */
             transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s, opacity 0.3s;
-            color: var(--text-color); 
-            opacity: 0; 
-        }
-        body.dark-mode .artifact-container {
-            background: var(--artifact-bg-dark);
-            border-color: var(--artifact-border-dark);
-            box-shadow: var(--artifact-shadow-dark);
+            color: var(--text-color);
+            opacity: 0;
         }
 
         .artifact-header {
@@ -1027,12 +1007,12 @@
         body.dark-mode .artifact-content { scrollbar-color: var(--scrollbar-thumb-color) rgba(255,255,255,0.03); }
         
         .code-artifact .artifact-content {
-          background-color: rgba(45,45,45,0.8);  
+          background-color: #2d2d2d; /* Solid background */
           color: #f0f0f0; font-family: 'Courier New', Courier, monospace;
-          border-radius: 0 0 8px 8px;  
+          border-radius: 0 0 8px 8px;
         }
         body.dark-mode .code-artifact .artifact-content {
-          background-color: rgba(30,30,30,0.8);  
+          background-color: #1e1e1e; /* Solid background for dark mode */
         }
         .code-artifact .artifact-content pre { margin: 0; padding: 0; white-space: pre-wrap; word-break: break-all; }
         .code-artifact .artifact-content code { display: block; }
@@ -1680,48 +1660,43 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
         }
         
         /* ========================================================== */
-        /* PERUBAHAN ARTIFACT VIEWER MENJADI BOTTOM SHEET MODAL        */
+        /* PERUBAHAN ARTIFACT VIEWER MENJADI CENTERED MODAL            */
         /* ========================================================== */
         #artifact-viewer-modal {
-            align-items: flex-end; /* Align content to bottom */
-            padding: 0;
+            align-items: center; /* Center vertically */
+            padding: 15px; /* Add some padding */
         }
         
         #artifact-viewer-modal .modal-content {
-            width: 100%;
-            height: 90vh;
-            max-height: 90vh;
-            border-radius: 16px 16px 0 0; /* Rounded top corners */
-            box-shadow: 0 -5px 25px rgba(0,0,0,0.15);
+            width: 90%;
+            max-width: 700px; /* Larger max-width */
+            max-height: 85vh; /* Limit height */
+            border-radius: 12px; /* Rounded corners for all sides */
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
             border: 1px solid var(--border-color);
-            border-bottom: none;
-            transform: translateY(100%); /* Start off-screen */
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Remove transform and slide-in transition */
+            transition: opacity 0.3s, transform 0.3s; /* Add fade/scale transition */
         }
         
         #artifact-viewer-modal.visible .modal-content {
-            transform: translateY(0); /* Slide in */
+            /* No transform needed */
         }
         
         body.dark-mode #artifact-viewer-modal .modal-content {
-            box-shadow: 0 -5px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
         }
 
-        /* New Grabber Handle */
+        /* Hide Grabber Handle */
         .modal-grabber {
-            width: 40px;
-            height: 5px;
-            background-color: var(--border-color);
-            border-radius: 2.5px;
-            margin: 8px auto; /* Centered handle */
-            flex-shrink: 0;
+            display: none !important;
         }
 
         #artifact-viewer-modal .modal-header {
-            background-color: var(--modal-header-bg);
-            padding: 8px calc(15px + var(--safe-area-inset-right)) 8px calc(15px + var(--safe-area-inset-left));
+            background-color: var(--surface-color); /* Explicit solid background */
+            padding: 12px calc(15px + var(--safe-area-inset-right)) 12px calc(15px + var(--safe-area-inset-left));
             border-bottom: 1px solid var(--border-color);
-            border-radius: 0; /* Header doesn't need radius now */
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1732,8 +1707,8 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
             display: flex;
             align-items: center;
             gap: 15px;
-            flex-grow: 1; /* Allow title to take space */
-            overflow: hidden; /* Prevent title from pushing buttons out */
+            flex-grow: 1;
+            overflow: hidden;
         }
 
         #artifact-viewer-modal .artifact-viewer-html-controls {
@@ -1741,17 +1716,16 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
         }
 
         #artifact-viewer-modal .modal-header h2#artifact-viewer-title {
-            font-size: 1.1em;
+            font-size: 1.0em; /* Slightly smaller title */
             font-weight: 700;
             color: var(--text-color);
             margin: 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: none; /* Let flexbox handle it */
         }
 
-        #artifact-viewer-modal .modal-close-btn { /* This is the (X) button */
+        #artifact-viewer-modal .modal-close-btn {
             font-size: 1.8em;
             color: var(--secondary-text-color);
             background: none; border: none; padding: 0;
@@ -1759,7 +1733,7 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
             cursor: pointer;
             width: 32px; height: 32px;
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; /* Prevent shrinking */
+            flex-shrink: 0;
         }
         #artifact-viewer-modal .modal-close-btn:hover { color: var(--text-color); }
         
@@ -1768,9 +1742,9 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
             display: flex;
             gap: 12px;
             align-items: center;
-            margin-left: auto; /* Push to the right */
-            padding-right: 12px; /* Space before close button */
-            flex-shrink: 0; /* Prevent shrinking */
+            margin-left: auto;
+            padding-right: 12px;
+            flex-shrink: 0;
         }
 
         .modal-actions-bar .modal-header-action-btn {
@@ -1801,24 +1775,24 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
         }
 
         #artifact-viewer-modal-body {
-            font-size: 0.9em;
+            font-size: 0.85em; /* Smaller font as requested */
             line-height: 1.5;
             flex-grow: 1;
-            overflow: hidden; /* Let child scroll */
+            overflow: hidden;
             color: var(--text-color);
-            padding: 0; /* Removed padding */
+            padding: 0;
             font-weight: 500;
             background-color: var(--surface-color);
-            display: flex; /* Make it a flex container */
-            flex-direction: column; /* Stack children vertically */
-            min-height: 0; /* Crucial for flex scrolling */
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
             padding-bottom: var(--safe-area-inset-bottom);
         }
         
         #artifact-viewer-modal-body > * {
-            flex-grow: 1; /* Make the content div grow */
-            overflow: auto; /* The content div is now the scroller */
-            padding: 15px; /* Add padding here */
+            flex-grow: 1;
+            overflow: auto;
+            padding: 15px;
             padding-left: calc(15px + var(--safe-area-inset-left));
             padding-right: calc(15px + var(--safe-area-inset-right));
         }
@@ -2276,6 +2250,50 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
             transform: scale(1.1);
             color: var(--button-bg-color);
         }
+
+        /* Model Switcher Modal Styles */
+        #model-switcher-modal .modal-content {
+            max-width: 550px;
+        }
+        .search-bar-container {
+            margin-bottom: 15px;
+        }
+        #model-search-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--input-bg-color);
+            color: var(--input-text-color);
+        }
+        #model-list-container {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .model-item {
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .model-item:hover {
+            background-color: #27272a;
+        }
+        .model-item.active {
+            border-color: var(--primary-color);
+            background-color: #2a3a4d;
+        }
+        .model-item h3 {
+            margin: 0 0 5px 0;
+            font-size: 1em;
+            color: var(--text-color);
+        }
+        .model-item p {
+            margin: 0;
+            font-size: 0.85em;
+            color: var(--secondary-text-color);
+        }
     </style>
 </head>
 <body>
@@ -2284,11 +2302,14 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
 
     <div id="app-layout-container">
         <div id="app-header">
-            <div id="profile-container">
-                <div id="profile-pic-container">
-                    <img src="https://s6.imgcdn.dev/YsWz8D.png" alt="Profile Picture">
+            <div id="header-left-group">
+                <button id="sidebar-toggle-btn" class="header-control-btn" title="Buka Menu">
+                    <i class="fi fi-rr-menu-burger"></i>
+                </button>
+                <div id="model-switcher-trigger">
+                    <span id="current-model-name"></span>
+                    <i class="fi fi-rr-angle-small-down"></i>
                 </div>
-                <span id="profile-text">FlabsAI</span>
             </div>
             
             <div id="app-header-tools-container">
@@ -2469,7 +2490,6 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
     <!-- Artifact Viewer Modal (MODIFIED TO BE A BOTTOM SHEET) -->
     <div id="artifact-viewer-modal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-grabber"></div> <!-- GAGANG UNTUK GESER -->
             <div class="modal-header">
                 <div class="modal-header-title-buttons-group">
                      <h2 id="artifact-viewer-title">Lihat Artifact</h2>
@@ -2592,6 +2612,24 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
             <div class="custom-dialog-actions">
                 <button id="custom-dialog-btn-confirm" class="primary">OK</button>
                 <button id="custom-dialog-btn-cancel" class="secondary" style="display:none;">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Switcher Modal -->
+    <div id="model-switcher-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Pilih Model AI</h2>
+                <button class="modal-close-btn" id="model-switcher-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-bar-container">
+                    <input type="text" id="model-search-input" placeholder="Cari model...">
+                </div>
+                <div id="model-list-container">
+                    <!-- Model items will be injected by JS -->
+                </div>
             </div>
         </div>
     </div>
@@ -3022,8 +3060,8 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
         ];
 
 
-        let currentGeminiModelName = CHATAI_MODEL_NAME;
-        let currentAppMode = 'chatai'; 
+        const modelsData = [{"name":"deepseek","description":"DeepSeek V3.1","maxInputChars":10000,"reasoning":true,"tier":"seed","community":false,"input_modalities":["text"],"output_modalities":["text"],"tools":true,"aliases":["deepseek-v3","deepseek-v3.1","deepseek-reasoning","deepseek-r1-0528"],"vision":false,"audio":false},{"name":"gemini","description":"Gemini 2.5 Flash Lite","tier":"seed","community":false,"input_modalities":["text","image"],"output_modalities":["text"],"tools":true,"aliases":["gemini-2.5-flash-lite"],"vision":true,"audio":false},{"name":"gemini-search","description":"Gemini 2.5 Flash Lite with Google Search","tier":"seed","community":false,"input_modalities":["text","image"],"output_modalities":["text"],"tools":true,"aliases":["searchgpt","geminisearch"],"vision":true,"audio":false},{"name":"mistral","description":"Mistral Small 3.2 24B","tier":"anonymous","community":false,"input_modalities":["text"],"output_modalities":["text"],"tools":true,"aliases":["mistral-small-3.1-24b-instruct","mistral-small-3.1-24b-instruct-2503","mistral-small-3.2-24b-instruct-2506"],"vision":false,"audio":false},{"name":"openai","description":"OpenAI GPT-5 Nano","tier":"anonymous","community":false,"input_modalities":["text","image"],"output_modalities":["text"],"tools":true,"maxInputChars":7000,"aliases":["gpt-5-mini"],"vision":true,"audio":false},{"name":"openai-audio","description":"OpenAI GPT-4o Mini Audio Preview","maxInputChars":10000,"voices":["alloy","echo","fable","onyx","nova","shimmer","coral","verse","ballad","ash","sage","amuch","dan"],"tier":"seed","community":false,"input_modalities":["text","image","audio"],"output_modalities":["audio","text"],"tools":true,"aliases":["gpt-4o-mini-audio-preview"],"vision":true,"audio":true},{"name":"openai-fast","description":"OpenAI GPT-4.1 Nano","tier":"anonymous","community":false,"input_modalities":["text","image"],"output_modalities":["text"],"tools":true,"maxInputChars":5000,"aliases":["gpt-5-nano"],"vision":true,"audio":false},{"name":"openai-large","description":"OpenAI GPT-5 Chat","tier":"seed","community":false,"input_modalities":["text","image"],"output_modalities":["text"],"tools":true,"maxInputChars":30000,"aliases":["gpt-5-chat"],"vision":true,"audio":false},{"name":"openai-reasoning","description":"OpenAI o4 Mini","tier":"seed","community":false,"reasoning":true,"supportsSystemMessages":false,"input_modalities":["text","image"],"output_modalities":["text"],"tools":true,"aliases":["o4-mini"],"vision":true,"audio":false},{"name":"qwen-coder","description":"Qwen 2.5 Coder 32B","tier":"anonymous","community":false,"input_modalities":["text"],"output_modalities":["text"],"tools":true,"aliases":["qwen2.5-coder-32b-instruct"],"vision":false,"audio":false},{"name":"roblox-rp","description":"Llama 3.1 8B Instruct","tier":"seed","community":false,"input_modalities":["text"],"output_modalities":["text"],"tools":true,"aliases":["llama-roblox","llama-fast-roblox"],"vision":false,"audio":false},{"name":"bidara","description":"BIDARA (Biomimetic Designer and Research Assistant by NASA)","tier":"anonymous","community":true,"input_modalities":["text","image"],"output_modalities":["text"],"tools":true,"aliases":[],"vision":true,"audio":false},{"name":"chickytutor","description":"ChickyTutor AI Language Tutor - (chickytutor.com)","tier":"anonymous","community":true,"input_modalities":["text"],"output_modalities":["text"],"tools":true,"aliases":[],"vision":false,"audio":false},{"name":"evil","description":"Evil","uncensored":true,"tier":"seed","community":true,"input_modalities":["text","image"],"output_modalities":["text"],"tools":true,"aliases":[],"vision":true,"audio":false},{"name":"midijourney","description":"MIDIjourney","tier":"anonymous","community":true,"input_modalities":["text"],"output_modalities":["text"],"tools":true,"aliases":[],"vision":false,"audio":false},{"name":"rtist","description":"Rtist","tier":"seed","community":true,"input_modalities":["text"],"output_modalities":["text"],"tools":true,"aliases":[],"vision":false,"audio":false},{"name":"unity","description":"Unity Unrestricted Agent","uncensored":true,"tier":"seed","community":true,"input_modalities":["text","image"],"output_modalities":["text"],"tools":true,"aliases":[],"vision":true,"audio":false}];
+        let currentModel = null;
 
         const MAX_CHAT_HISTORY = 20;
         const MIN_IMAGE_LOADING_DISPLAY_MS = 800; 
@@ -3160,7 +3198,8 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
             reportAttachmentPreview,
             customReportCategoryContainer,
             profileContainer, profilePicContainer, profileModal, profileModalCloseBtn,
-            collapseInputAreaBtn, expandInputAreaBtn; 
+            collapseInputAreaBtn, expandInputAreaBtn,
+            modelSwitcherTrigger, modelSwitcherModal, modelSwitcherCloseBtn, modelSearchInput, modelListContainer, currentModelNameSpan;
             
         let imageProcessorWorker;
         let newChatSessionCounter = 0;
@@ -3501,6 +3540,14 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
             profileModal = document.getElementById('profile-modal');
             profileModalCloseBtn = document.getElementById('profile-modal-close-btn');
 
+            // Model Switcher Elements
+            modelSwitcherTrigger = document.getElementById('model-switcher-trigger');
+            modelSwitcherModal = document.getElementById('model-switcher-modal');
+            modelSwitcherCloseBtn = document.getElementById('model-switcher-close-btn');
+            modelSearchInput = document.getElementById('model-search-input');
+            modelListContainer = document.getElementById('model-list-container');
+            currentModelNameSpan = document.getElementById('current-model-name');
+
             cameraModal = document.getElementById('camera-modal');
             cameraPreview = document.getElementById('camera-preview');
             capturePhotoBtn = document.getElementById('capture-photo-btn');
@@ -3603,6 +3650,15 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
             if (profileContainer) profileContainer.addEventListener('click', () => openModal(profileModal));
             if (profileModalCloseBtn) profileModalCloseBtn.addEventListener('click', () => closeModal(profileModal));
             if (profileModal) profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeModal(profileModal); });
+
+            // Model Switcher Listeners
+            if(modelSwitcherTrigger) modelSwitcherTrigger.addEventListener('click', () => {
+                populateModelList('');
+                openModal(modelSwitcherModal);
+            });
+            if(modelSwitcherCloseBtn) modelSwitcherCloseBtn.addEventListener('click', () => closeModal(modelSwitcherModal));
+            if(modelSwitcherModal) modelSwitcherModal.addEventListener('click', (e) => { if (e.target === modelSwitcherModal) closeModal(modelSwitcherModal); });
+            if(modelSearchInput) modelSearchInput.addEventListener('input', (e) => populateModelList(e.target.value));
 
             if(downloadChatBtn) downloadChatBtn.addEventListener('click', () => { 
                 if (aiIsCurrentlyResponding || isGeneratingImage || isProcessingImageClientSide || isVoiceSessionActive || isTextAnimating || isEditing || isWelcomeAnimating) { showCustomDialog("Peringatan", "Harap tunggu proses AI, input suara, atau pengeditan selesai.", "alert"); return; }
@@ -3991,6 +4047,7 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
 
             updateAppModeUI();
             updateSendButtonState();
+            setCurrentModel('gemini'); // Atur model default
             startApp();
         }
 
@@ -4034,26 +4091,66 @@ body.dark-mode #profile-modal .modal-close-btn:hover {
             }
         }
 
-        function updateAppModeUI() { 
-            if (!userInput || !fileActionsBtn || !fileActionsMenu || !deepThinkBtn) return;
+        function populateModelList(filter = '') {
+            modelListContainer.innerHTML = '';
+            const filteredModels = modelsData.filter(m => m.name.toLowerCase().includes(filter.toLowerCase()) || m.description.toLowerCase().includes(filter.toLowerCase()));
 
-            userInput.placeholder = "Ketik pesan atau minta buat gambar...";
+            filteredModels.forEach(model => {
+                const modelItem = document.createElement('div');
+                modelItem.className = 'model-item';
+                modelItem.dataset.modelName = model.name;
+                if (currentModel && currentModel.name === model.name) {
+                    modelItem.classList.add('active');
+                }
+                modelItem.innerHTML = `<h3>${model.name}</h3><p>${model.description}</p>`;
+                modelItem.addEventListener('click', () => {
+                    setCurrentModel(model.name);
+                    closeModal(modelSwitcherModal);
+                });
+                modelListContainer.appendChild(modelItem);
+            });
+        }
 
-            fileActionsBtn.title = "Tambah Lampiran/Aksi";
-            fileActionsMenu.innerHTML = ''; 
+        function setCurrentModel(modelName) {
+            const model = modelsData.find(m => m.name === modelName);
+            if (model) {
+                currentModel = model;
+                console.log(`Model saat ini diatur ke: ${model.name}`);
+                currentModelNameSpan.textContent = model.name;
+                populateModelList(modelSearchInput.value);
+                updateAppModeUI();
+            } else {
+                console.error(`Model '${modelName}' tidak ditemukan.`);
+            }
+        }
 
-            const attachImage = document.createElement('button'); attachImage.textContent = 'Lampirkan Gambar';
-            attachImage.onclick = () => { if(imageAttachmentInput) imageAttachmentInput.click(); closeOtherDropdowns(null); fileActionsMenu.style.display = 'none'; fileActionsBtn.classList.remove('open'); };
-            fileActionsMenu.appendChild(attachImage);
+        function updateAppModeUI() {
+            if (!currentModel || !userInput || !fileActionsBtn || !fileActionsMenu || !deepThinkBtn || !micBtn) return;
 
-            const attachDoc = document.createElement('button'); attachDoc.textContent = 'Lampirkan Dokumen';
-            attachDoc.onclick = () => { if(documentAttachmentInput) documentAttachmentInput.click(); closeOtherDropdowns(null); fileActionsMenu.style.display = 'none'; fileActionsBtn.classList.remove('open');};
+            userInput.placeholder = `Kirim pesan ke ${currentModel.name}...`;
+
+            fileActionsMenu.innerHTML = '';
+            let canAttachImage = currentModel.vision;
+            let canUseMic = currentModel.audio;
+
+            if (canAttachImage) {
+                const attachImage = document.createElement('button');
+                attachImage.textContent = 'Lampirkan Gambar';
+                attachImage.onclick = () => { imageAttachmentInput.click(); fileActionsMenu.style.display = 'none'; };
+                fileActionsMenu.appendChild(attachImage);
+
+                const openCamera = document.createElement('button');
+                openCamera.textContent = 'Buka Kamera';
+                openCamera.onclick = () => { openCameraModal(); fileActionsMenu.style.display = 'none'; };
+                fileActionsMenu.appendChild(openCamera);
+            }
+
+            const attachDoc = document.createElement('button');
+            attachDoc.textContent = 'Lampirkan Dokumen';
+            attachDoc.onclick = () => { documentAttachmentInput.click(); fileActionsMenu.style.display = 'none'; };
             fileActionsMenu.appendChild(attachDoc);
 
-            const openCamera = document.createElement('button'); openCamera.textContent = 'Buka Kamera';
-            openCamera.onclick = () => { openCameraModal(); closeOtherDropdowns(null); fileActionsMenu.style.display = 'none'; fileActionsBtn.classList.remove('open'); };
-            fileActionsMenu.appendChild(openCamera);
-            
+            micBtn.style.display = canUseMic ? 'flex' : 'none';
             deepThinkBtn.title = isDeepThinking ? "Mode Berpikir Mendalam (Aktif)" : "Mode Berpikir Mendalam";
             deepThinkBtn.classList.toggle('active', isDeepThinking);
         }
@@ -5539,6 +5636,7 @@ Pastikan ada spasi antar kata yang wajar dalam setiap respons Anda agar mudah di
             queryParams.push(`height=${originalHeight}`);
             queryParams.push(`seed=${seed}`);
             queryParams.push(`model=${encodeURIComponent(currentImageAI_PollinationsModel)}`);
+            queryParams.push(`cache_bust=${Date.now()}`); // PERBAIKAN: Menambahkan cache buster
 
             if (queryParams.length > 0) pollingationsApiUrl += '?' + queryParams.join('&');
 
@@ -5788,18 +5886,28 @@ Pastikan ada spasi antar kata yang wajar dalam setiap respons Anda agar mudah di
             
             if (artifactViewerTitle) artifactViewerTitle.textContent = title;
 
-            let displayContent = "";
-            if (isCode) { 
+            artifactViewerModalBody.innerHTML = ''; // PERBAIKAN: Hapus konten lama
+
+            if (isCode) {
                 const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = contentHTML; 
+                tempDiv.innerHTML = contentHTML;
                 const codeText = tempDiv.querySelector('pre code') ? tempDiv.querySelector('pre code').textContent : tempDiv.textContent;
-                displayContent = `<div class="code-artifact-viewer-content"><pre><code>${DOMPurify.sanitize(codeText, {...domPurifyConfig, ALLOWED_TAGS:[]})}</code></pre></div>`;
+
+                // PERBAIKAN: Buat elemen secara manual untuk mencegah rendering HTML
+                const container = document.createElement('div');
+                container.className = 'code-artifact-viewer-content';
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = codeText; // Ini memastikan konten ditampilkan sebagai teks
+                pre.appendChild(code);
+                container.appendChild(pre);
+                artifactViewerModalBody.appendChild(container);
             } else if (isTable) {
-                displayContent = `<div class="table-artifact-viewer-content">${DOMPurify.sanitize(contentHTML, domPurifyConfig)}</div>`;
+                const displayContent = `<div class="table-artifact-viewer-content">${DOMPurify.sanitize(contentHTML, domPurifyConfig)}</div>`;
+                artifactViewerModalBody.innerHTML = displayContent;
             } else {
-                displayContent = DOMPurify.sanitize(contentHTML, domPurifyConfig);
+                artifactViewerModalBody.innerHTML = DOMPurify.sanitize(contentHTML, domPurifyConfig);
             }
-            artifactViewerModalBody.innerHTML = displayContent;
 
             artifactViewerCopyBtn.innerHTML = DOMPurify.sanitize(copyIconHTML, domPurifyConfig);
             artifactViewerCopyBtn.title = "Salin Konten";
@@ -6988,6 +7096,25 @@ Pastikan ada spasi antar kata yang wajar dalam setiap respons Anda agar mudah di
             closeModal(cameraModal);
         }
 
+        function dataURLtoFile(dataurl, filename) {
+            let arr = dataurl.split(','), mimeMatch = arr[0].match(/:(.*?);/);
+            if (!mimeMatch) {
+                console.error("Invalid data URL format");
+                return null;
+            }
+            let mime = mimeMatch[1],
+                bstr = atob(arr[arr.length - 1]), n = bstr.length, u8arr = new Uint8Array(n);
+            while(n--){
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            try {
+                return new File([u8arr], filename, {type:mime});
+            } catch (e) {
+                console.error("File API not fully supported. Could not create file from data URL.", e);
+                return null;
+            }
+        }
+
         function capturePhoto() {
             if (!currentCameraStream || !cameraPreview) return;
 
@@ -7007,9 +7134,16 @@ Pastikan ada spasi antar kata yang wajar dalam setiap respons Anda agar mudah di
                 return;
             }
 
+            const capturedFile = dataURLtoFile(dataUrl, fileName);
+            if (!capturedFile) {
+                showCustomDialog("Error", "Gagal mengonversi foto yang diambil.", "alert");
+                closeCameraModal();
+                return;
+            }
+
             attachedFiles.push({
                 id: fileId,
-                fileObject: null, 
+                fileObject: capturedFile,
                 type: 'image',
                 dataUrl: dataUrl,
                 name: fileName,
