@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FlabsWorld</title>
+    <link rel="icon" href="https://s6.imgcdn.dev/YsWz8D.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.2/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    
+    <style>
+        /* 1. Definisi Variabel Warna & Font dari Landing Page */
+        :root {
+            --bg-color: #0c0c0e; 
+            --surface-color: #18181B; 
+            --text-color: #e8eaed; 
+            --secondary-text-color: #a8adb4;
+            --border-color: #303134; 
+            
+            --glass-bg-dark: rgba(38, 38, 42, 0.45);
+            --glass-blur-dark: 8px; 
+            --glass-border-color-dark: rgba(60, 60, 65, 0.4); 
+            --glass-shadow-dark: 0 5px 15px -4px rgba(0,0,0,0.3), inset 0 0.3px 0.3px rgba(255,255,255,0.05); 
+            --glass-sheen-dark: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0) 100%);
+            --glass-icon-button-hover-bg-dark: rgba(52, 52, 57, 0.55);
+
+            --primary-btn-bg: #d1d3d6; 
+            --primary-btn-text: #0f0f12; 
+
+            --text-color-rgb: 232, 234, 237; 
+            --bg-color-rgb: 12, 12, 14; 
+            --secondary-text-color-rgb: 168, 173, 180;
+            
+            --font-main: 'Poppins', sans-serif; 
+            
+            --dot-grid-color: rgba(var(--secondary-text-color-rgb), 0.1); 
+            --dot-size: 1px;
+            --dot-spacing: 25px; 
+            --auth-box-border-radius: 24px; /* Disesuaikan dengan .chat-container */
+        }
+
+        /* 2. Reset CSS & Pengaturan Dasar Body */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        body {
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Background Layers dari Landing Page */
+        body::before { 
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 130%, rgba(var(--secondary-text-color-rgb), 0.15) 0%, transparent 70%),
+                        radial-gradient(circle at 50% 50%, rgba(var(--secondary-text-color-rgb), 0.05) 0%, transparent 40%);
+            z-index: 3; pointer-events: none;
+        }
+        #dot-grid-background { 
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(var(--dot-grid-color) var(--dot-size), transparent var(--dot-size));
+            background-size: var(--dot-spacing) var(--dot-spacing);
+            z-index: 1;
+        }
+        
+        .app-wrapper { display: flex; flex-direction: column; height: 100vh; transition: filter 0.3s ease-in-out; }
+        .app-wrapper.blurred { filter: blur(5px); }
+
+        #orientation-blocker { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); color: var(--text-color); flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 9999; padding: 20px; }
+        #orientation-blocker p { font-size: 18px; line-height: 1.6; }
+        @media (min-width: 768px) { .app-wrapper { display: none; } #orientation-blocker { display: flex; } #orientation-blocker p { max-width: 500px; } }
+        @media (max-width: 767px) and (orientation: landscape) { .app-wrapper { display: none; } #orientation-blocker { display: flex; } }
+
+        .header { width: 100%; text-align: center; padding: 20px 15px; flex-shrink: 0; position: relative; z-index: 10; }
+        .header-glass-container {
+            display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px;
+            background: var(--glass-bg-dark); border: 1px solid var(--glass-border-color-dark);
+            border-radius: 12px; backdrop-filter: blur(var(--glass-blur-dark));
+            -webkit-backdrop-filter: blur(var(--glass-blur-dark)); box-shadow: var(--glass-shadow-dark);
+            position: relative; overflow: hidden;
+        }
+        .header-glass-container::before {
+            content: ''; position: absolute; top: 0; left: -80%; width: 60%; height: 100%;
+            background: var(--glass-sheen-dark); transform: skewX(-25deg); pointer-events: none; opacity: 0.8;
+        }
+        .logo { height: 24px; width: 24px; }
+        .logo-text { font-size: 18px; font-weight: 600; color: var(--text-color); }
+        
+        .page-container {
+            flex-grow: 1; width: 100%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 15px; box-sizing: border-box;
+            z-index: 1; position: relative; overflow-y: auto;
+        }
+        .page { display: none; width: 100%; max-width: 400px; text-align: center; flex-shrink: 0; }
+        .page.active { display: block; }
+
+        .auth-content-wrapper { opacity: 1; transition: opacity 0.3s ease-in-out; }
+        .auth-content-wrapper.fading { opacity: 0; }
+
+        /* REVISI: Mengadopsi style .chat-container dari Landing Page */
+        .auth-box {
+            background: var(--glass-bg-dark);
+            border: 1px solid var(--glass-border-color-dark);
+            backdrop-filter: blur(var(--glass-blur-dark));
+            -webkit-backdrop-filter: blur(var(--glass-blur-dark));
+            padding: 0;
+            border-radius: var(--auth-box-border-radius);
+            box-shadow: var(--glass-shadow-dark);
+            text-align: left;
+            overflow: hidden;
+            position: relative;
+        }
+        .auth-box::before {
+            content: ''; position: absolute; top: 0; left: -80%; width: 60%; height: 100%;
+            background: var(--glass-sheen-dark); transform: skewX(-25deg); pointer-events: none; opacity: 0.8;
+        }
+
+        .auth-box-header { padding: 18px; border-bottom: 1px solid var(--glass-border-color-dark); }
+        .auth-box-heading { font-size: 20px; font-weight: 600; color: var(--text-color); margin: 0; text-align: center; }
+        
+        .auth-box-content { padding: 20px; }
+        .auth-toggle-header { margin-bottom: 16px; display: flex; justify-content: flex-start; align-items: center; gap: 8px; font-size: 14px; color: var(--secondary-text-color);}
+
+        .form-step { display: none; }
+        .form-step.active { display: block; animation: stepFadeIn 0.4s ease-out; }
+        @keyframes stepFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { font-size: 13px; color: var(--secondary-text-color); font-weight: 500; margin-bottom: 6px; display: block; }
+        
+        .form-control {
+            width: 100%; padding: 11px; border: 1px solid var(--glass-border-color-dark);
+            border-radius: 8px; box-sizing: border-box; font-size: 15px; color: var(--text-color);
+            background-color: transparent; font-family: var(--font-main);
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .form-control::placeholder { color: var(--secondary-text-color); opacity: 0.7; }
+        .form-control:focus { outline: none; border-color: var(--text-color); background-color: rgba(0,0,0,0.2); }
+        .password-input-wrapper { position: relative; display: flex; align-items: center; }
+        .password-input-wrapper .form-control { padding-right: 45px; }
+        .password-toggle-icon { position: absolute; right: 12px; cursor: pointer; color: var(--secondary-text-color); font-size: 20px; line-height: 1; }
+        .forgot-password-container { text-align: right; margin-top: 6px; }
+
+        .btn {
+            width: 100%; padding: 11px; border-radius: 10px; font-size: 15px;
+            font-weight: 600; cursor: pointer; transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+            margin-top: 8px; display: flex; align-items: center; justify-content: center;
+            gap: 10px; border: none; font-family: var(--font-main);
+            position: relative; overflow: hidden;
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .btn-primary { 
+            background-color: var(--primary-btn-bg); color: var(--primary-btn-text);
+            border: 1px solid var(--primary-btn-bg); margin-top: 12px;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.85; }
+
+        /* REVISI: Tombol sekunder diubah menjadi tombol glass */
+        .btn-glass {
+            background: var(--glass-bg-dark);
+            border: 1px solid var(--glass-border-color-dark);
+            box-shadow: var(--glass-shadow-dark);
+            backdrop-filter: blur(var(--glass-blur-dark));
+            -webkit-backdrop-filter: blur(var(--glass-blur-dark));
+            color: var(--text-color);
+        }
+        .btn-glass::before {
+            content: ''; position: absolute; top: 0; left: -80%; width: 60%; height: 100%;
+            background: var(--glass-sheen-dark); transform: skewX(-25deg); pointer-events: none; opacity: 0.7;
+        }
+        .btn-glass:hover:not(:disabled) { 
+            background-color: var(--glass-icon-button-hover-bg-dark);
+            border-color: var(--text-color); 
+        }
+
+        .divider { text-align: center; margin: 20px 0; color: var(--secondary-text-color); font-size: 12px; position: relative; font-weight: 500; text-transform: uppercase; }
+        .divider::before, .divider::after { content: ''; display: inline-block; width: 38%; height: 1px; background-color: var(--border-color); vertical-align: middle; }
+        .divider::before { margin-right: 12px; }
+        .divider::after { margin-left: 12px; }
+
+        .toggle-form-link { color: var(--secondary-text-color); text-decoration: none; font-size: 13px; font-weight: 500; cursor: pointer; }
+        .toggle-form-link:hover { text-decoration: underline; color: var(--text-color); }
+        .btn-outline-link-style { background-color: transparent; color: var(--text-color); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background-color 0.2s; cursor: pointer; }
+        .btn-outline-link-style:hover { background-color: var(--surface-color); text-decoration: none; color: var(--text-color);}
+        
+        .checkbox-container { display: flex; align-items: center; gap: 10px; margin-top: 16px; margin-bottom: 12px; }
+        .checkbox-container label { font-size: 12px; color: var(--secondary-text-color); line-height: 1.5; margin-bottom: 0; cursor: default; }
+        .checkbox-container label a { color: var(--text-color); text-decoration: underline; font-weight: 500; cursor: pointer; }
+        
+        input[type="checkbox"] {
+            appearance: none; -webkit-appearance: none; width: 18px; height: 18px;
+            background-color: transparent; border: 1px solid var(--border-color);
+            border-radius: 4px; cursor: pointer; position: relative; flex-shrink: 0;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        input[type="checkbox"]:checked { background-color: var(--text-color); border-color: var(--text-color); }
+        input[type="checkbox"]:checked::after {
+            content: '✔'; font-size: 14px; color: var(--bg-color);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(var(--bg-color-rgb), 0.7); display: flex; justify-content: center; align-items: flex-end; z-index: 2000; opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none; backdrop-filter: blur(5px); }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .modal-content { background-color: var(--surface-color); border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -8px 30px rgba(0,0,0,0.3); color: var(--text-color); border: 1px solid var(--border-color); border-bottom: none; display: flex; flex-direction: column; width: 100%; max-height: 85vh; transform: translateY(100%); opacity: 1; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); touch-action: none; }
+        .modal-overlay.show .modal-content { transform: translateY(0); }
+        .modal-header { display: flex; flex-direction: column; align-items: center; padding: 12px 24px 16px 24px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; cursor: grab; }
+        .modal-header:active { cursor: grabbing; }
+        .modal-drag-handle { width: 40px; height: 5px; background-color: var(--border-color); border-radius: 3px; margin-bottom: 12px; }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-body { padding: 0 24px 24px 24px; overflow-y: auto; line-height: 1.6; }
+        .modal-body p { margin-bottom: 1em; } .modal-body ul { padding-left: 20px; } .modal-body li { margin-bottom: 0.5em; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+        .notification-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(var(--bg-color-rgb), 0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.25s ease-in-out; pointer-events: none; backdrop-filter: blur(5px); }
+        .notification-overlay.show { opacity: 1; pointer-events: auto; }
+        .notification-content { background-color: var(--surface-color); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); color: var(--text-color); border: 1px solid var(--border-color); transform: scale(0.95); opacity: 0; transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease-out; padding: 24px; text-align: center; max-width: 320px; width: 90%; }
+        .notification-overlay.show .notification-content { transform: scale(1); opacity: 1; }
+        .notification-title { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+        .notification-message { font-size: 14px; margin-bottom: 20px; line-height: 1.5; color: var(--secondary-text-color); }
+        #notificationAction { background-color: var(--primary-btn-bg); color: var(--primary-btn-text); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
+        #notificationAction:hover { opacity: 0.85; }
+    </style>
+</head>
+<body>
+    <div id="dot-grid-background"></div>
+    <div class="app-wrapper">
+        <header class="header">
+            <div class="header-glass-container">
+                <img src="https://s6.imgcdn.dev/YsWz8D.png" alt="FlabsWorld Logo" class="logo">
+                <span class="logo-text">FlabsWorld</span>
+            </div>
+        </header>
+        <main class="page-container">
+            <div id="authPage" class="page"><div class="auth-box"><div class="auth-box-header"><h2 class="auth-box-heading" id="authBoxHeading"></h2></div><div class="auth-content-wrapper"><div class="auth-box-content">
+                <div class="auth-toggle-header"><span id="authToggleText"></span></div>
+                <form id="authForm" novalidate>
+                    <div class="form-step" id="signUpStep1"><div class="form-group"><label for="fullName">Nama Lengkap</label><input type="text" id="fullName" class="form-control" placeholder="John Doe"></div><div class="form-group"><label for="emailSignUp">Alamat Email</label><input type="email" id="emailSignUp" class="form-control" placeholder="anda@example.com"></div></div>
+                    <div class="form-step" id="credentialsStep"><div class="form-group" id="emailLoginGroup"><label for="emailLogin">Alamat Email</label><input type="email" id="emailLogin" class="form-control" placeholder="anda@example.com"></div><div class="form-group"><label for="password">Kata Sandi</label><div class="password-input-wrapper"><input type="password" id="password" class="form-control" placeholder="••••••••"><i class="fi fi-rr-eye password-toggle-icon" id="togglePassword"></i></div><div class="forgot-password-container" id="loginLinks"><a href="#" id="forgotPasswordLink" class="toggle-form-link">Lupa kata sandi?</a></div></div><div class="form-group" id="confirmPasswordGroupContainer"><label for="confirmPassword">Konfirmasi Kata Sandi</label><div class="password-input-wrapper"><input type="password" id="confirmPassword" class="form-control" placeholder="••••••••"><i class="fi fi-rr-eye password-toggle-icon" id="toggleConfirmPassword"></i></div></div></div>
+                    
+                    <div class="checkbox-container" id="termsContainer" style="display: none;">
+                        <input type="checkbox" id="termsCheckbox" required>
+                        <label>Dengan melanjutkan, Anda menyetujui <a id="termsLink">Ketentuan Layanan</a> dan <a id="privacyLink">Kebijakan Privasi</a> FlabsWorld.</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="authSubmitButton"></button>
+                    <button type="button" class="btn btn-glass" id="signUpBackToStep1Btn" style="display: none;">Kembali</button>
+                </form>
+                <div id="authFormBottomContent" style="display: none;"><div class="divider">ATAU</div>
+                <button type="button" class="btn btn-glass" id="googleAuthBtn"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="width: 18px; height: 18px;"> Lanjutkan dengan Google</button>
+                <button type="button" class="btn btn-glass" id="guestLoginBtn"><i class="fi fi-rr-user-lock"></i> Masuk sebagai Tamu</button></div>
+            </div></div></div></div>
+        </main>
+    </div>
+    
+    <div id="orientation-blocker">
+        <p>Untuk pengalaman terbaik, silakan gunakan situs ini di perangkat seluler dalam mode potret.</p>
+    </div>
+
+    <div id="notificationOverlay" class="notification-overlay" style="display: none;"><div class="notification-content"><h3 id="notificationTitle" class="notification-title"></h3><p id="notificationMessage" class="notification-message"></p><button id="notificationAction" class="btn notification-action-btn">OK</button></div></div>
+    
+    <div id="mainModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader">
+                <div class="modal-drag-handle"></div>
+                <h3 id="modalTitle" class="modal-title"></h3>
+            </div>
+            <div id="modalBody" class="modal-body"></div>
+            <div id="modalFooter" class="modal-footer"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const appWrapper = document.querySelector('.app-wrapper'); const authForm = document.getElementById('authForm'); const authContentWrapper = document.querySelector('.auth-content-wrapper'); const fullNameInput = document.getElementById('fullName'), emailSignUpInput = document.getElementById('emailSignUp'), emailLoginInput = document.getElementById('emailLogin'), passwordInput = document.getElementById('password'), confirmPasswordInput = document.getElementById('confirmPassword'); const signUpStep1El = document.getElementById('signUpStep1'), credentialsStepEl = document.getElementById('credentialsStep'); const emailLoginGroupEl = document.getElementById('emailLoginGroup'), confirmPasswordGroupContainerEl = document.getElementById('confirmPasswordGroupContainer'), signUpBackToStep1Btn = document.getElementById('signUpBackToStep1Btn'), authSubmitButton = document.getElementById('authSubmitButton'); const authBoxHeadingEl = document.getElementById('authBoxHeading'), authToggleTextEl = document.getElementById('authToggleText'), loginLinksEl = document.getElementById('loginLinks'); const authFormBottomContentEl = document.getElementById('authFormBottomContent'); const notificationOverlay = document.getElementById('notificationOverlay'), notificationTitleEl = document.getElementById('notificationTitle'), notificationMessageEl = document.getElementById('notificationMessage'); let notificationActionBtn = document.getElementById('notificationAction'); const termsContainer = document.getElementById('termsContainer'); const termsCheckbox = document.getElementById('termsCheckbox');
+            const mainModal = document.getElementById('mainModal'); const modalContent = mainModal.querySelector('.modal-content'); const modalHeader = document.getElementById('modalHeader'); const modalTitleEl = document.getElementById('modalTitle'); const modalBodyEl = document.getElementById('modalBody'); const modalFooterEl = document.getElementById('modalFooter'); let isDragging = false, startY;
+            const googleAuthBtn = document.getElementById('googleAuthBtn'), guestLoginBtn = document.getElementById('guestLoginBtn'), termsLink = document.getElementById('termsLink'), privacyLink = document.getElementById('privacyLink'), forgotPasswordLink = document.getElementById('forgotPasswordLink'); let currentAuthMode = 'login', currentSignUpStep = 1;
+            const termsContent = `<p>Selamat datang di FlabsWorld! Dengan menggunakan layanan kami, Anda setuju dengan ketentuan ini. Mohon dibaca dengan seksama.</p><p><strong>1. Penggunaan Layanan:</strong> Anda setuju untuk tidak menyalahgunakan layanan kami. Misalnya, jangan mengganggu layanan kami atau mencoba mengaksesnya menggunakan metode selain antarmuka dan instruksi yang kami berikan. Anda hanya dapat menggunakan layanan kami sebagaimana diizinkan oleh hukum.</p><p><strong>2. Akun Anda:</strong> Anda mungkin memerlukan Akun FlabsWorld untuk menggunakan beberapa layanan kami. Anda bertanggung jawab atas aktivitas yang terjadi pada atau melalui Akun Anda.</p><p><strong>3. Konten Anda:</strong> Beberapa layanan kami memungkinkan Anda untuk mengunggah, mengirim, menyimpan, serta menerima konten. Anda tetap memiliki kepemilikan atas hak kekayaan intelektual apa pun yang Anda miliki dalam konten tersebut.</p><p><strong>4. Modifikasi dan Penghentian Layanan:</strong> Kami terus-menerus mengubah dan meningkatkan layanan kami. Kami dapat menambahkan atau menghapus fungsionalitas atau fitur, dan kami dapat menangguhkan atau menghentikan layanan sama sekali.</p><p>Terima kasih telah membaca. Kami berharap Anda menikmati menggunakan FlabsWorld.</p>`; const privacyContent = `<p>Kebijakan Privasi ini menjelaskan bagaimana FlabsWorld mengumpulkan, menggunakan, dan melindungi informasi pribadi Anda.</p><p><strong>1. Informasi yang Kami Kumpulkan:</strong> Kami mengumpulkan informasi yang Anda berikan langsung kepada kami. Misalnya, kami mengumpulkan informasi saat Anda membuat akun, seperti nama, alamat email, dan kata sandi.</p><p><strong>2. Bagaimana Kami Menggunakan Informasi:</strong> Kami menggunakan informasi yang kami kumpulkan untuk menyediakan, memelihara, dan meningkatkan layanan kami, serta untuk mengembangkan layanan baru.</p><p><strong>3. Berbagi Informasi:</strong> Kami tidak membagikan informasi pribadi Anda dengan perusahaan, organisasi, atau individu di luar FlabsWorld kecuali salah satu dari keadaan berikut berlaku: dengan persetujuan Anda atau untuk alasan hukum.</p><p><strong>4. Keamanan:</strong> Kami bekerja keras untuk melindungi FlabsWorld dan pengguna kami dari akses tidak sah atau pengubahan, pengungkapan, atau perusakan informasi yang kami pegang secara tidak sah.</p><p>Kepercayaan Anda penting bagi kami. Kami berkomitmen untuk melindungi privasi Anda.</p>`;
+            const manageNotificationOverlay = (show) => { if (show) { notificationOverlay.style.display = 'flex'; setTimeout(() => { appWrapper.classList.add('blurred'); notificationOverlay.classList.add('show'); }, 10); } else { appWrapper.classList.remove('blurred'); notificationOverlay.classList.remove('show'); setTimeout(() => { notificationOverlay.style.display = 'none'; }, 250); } };
+            const showCustomNotification = (title, message, onAction = null) => { notificationTitleEl.textContent = title; notificationMessageEl.innerHTML = message; const newActionBtn = notificationActionBtn.cloneNode(true); notificationActionBtn.parentNode.replaceChild(newActionBtn, notificationActionBtn); notificationActionBtn = newActionBtn; notificationActionBtn.onclick = () => { manageNotificationOverlay(false); if (onAction) onAction(); }; manageNotificationOverlay(true); };
+            const hideModal = () => { appWrapper.classList.remove('blurred'); document.body.style.overflow = ''; mainModal.classList.remove('show'); setTimeout(() => { mainModal.style.display = 'none'; modalContent.style.transform = ''; }, 400); };
+            const showModal = (title, content, footerContent = '') => { modalTitleEl.textContent = title; modalBodyEl.innerHTML = content; modalFooterEl.innerHTML = footerContent; modalBodyEl.scrollTop = 0; mainModal.style.display = 'flex'; document.body.style.overflow = 'hidden'; setTimeout(() => { appWrapper.classList.add('blurred'); mainModal.classList.add('show'); }, 10); };
+            function onDragStart(e) { isDragging = true; startY = e.pageY || e.touches[0].pageY; modalContent.style.transition = 'none'; }
+            function onDragMove(e) { if (!isDragging) return; const currentY = e.pageY || e.touches[0].pageY; const deltaY = currentY - startY; if (deltaY > 0) { modalContent.style.transform = `translateY(${deltaY}px)`; } }
+            function onDragEnd(e) { if (!isDragging) return; isDragging = false; const currentY = e.pageY || e.changedTouches[0].pageY; const deltaY = currentY - startY; modalContent.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'; if (deltaY > modalContent.offsetHeight * 0.3) { hideModal(); } else { modalContent.style.transform = 'translateY(0)'; } }
+            modalHeader.addEventListener('mousedown', onDragStart); modalHeader.addEventListener('touchstart', onDragStart, { passive: true });
+            document.addEventListener('mousemove', onDragMove); document.addEventListener('touchmove', onDragMove, { passive: false });
+            document.addEventListener('mouseup', onDragEnd); document.addEventListener('touchend', onDragEnd);
+            mainModal.addEventListener('click', (e) => { if (e.target === mainModal) hideModal(); });
+            const showGuestModal = () => { const guestBodyContent = `<p>Selamat datang di Mode Tamu! Mode ini memberi Anda pratinjau fungsionalitas tanpa perlu membuat akun.</p><p><strong>Harap perhatikan batasan berikut:</strong></p><ul><li><strong>Tidak Ada Riwayat Obrolan:</strong> Percakapan Anda tidak akan disimpan.</li><li><strong>Akses Fitur Terbatas:</strong> Beberapa fitur tingkat lanjut mungkin tidak tersedia.</li><li><strong>Batasan Penggunaan:</strong> Sesi tamu mungkin memiliki batasan jumlah permintaan.</li><li><strong>Tidak Ada Personalisasi:</strong> AI tidak akan mempelajari preferensi Anda.</li></ul><div class="checkbox-container" style="margin-top: 16px; margin-bottom: 0;"><input type="checkbox" id="guestAgreeCheckbox"><label>Saya memahami dan menyetujui batasan-batasan ini.</label></div>`; const guestFooterContent = `<button id="guestLetsGoBtn" class="btn btn-primary" disabled>Lanjutkan</button>`; showModal('Ketentuan Mode Tamu', guestBodyContent, guestFooterContent); const guestCheckbox = document.getElementById('guestAgreeCheckbox'); const guestButton = document.getElementById('guestLetsGoBtn'); if (guestCheckbox && guestButton) { guestCheckbox.addEventListener('change', () => { guestButton.disabled = !guestCheckbox.checked; }); guestButton.addEventListener('click', () => { window.location.href = 'chat.html'; }); } };
+            function updateButtonState() { if (currentAuthMode === 'login') { const isEmailValid = emailLoginInput.value.trim() !== ''; const isPasswordValid = passwordInput.value.trim() !== ''; const isTermsChecked = termsCheckbox.checked; authSubmitButton.disabled = !(isEmailValid && isPasswordValid && isTermsChecked); } else { authSubmitButton.disabled = false; } }
+            function updateAuthFormDisplay() { const isLogin = currentAuthMode === 'login'; signUpStep1El.classList.toggle('active', !isLogin && currentSignUpStep === 1); credentialsStepEl.classList.toggle('active', isLogin || (!isLogin && currentSignUpStep === 2)); emailLoginGroupEl.style.display = isLogin ? 'block' : 'none'; confirmPasswordGroupContainerEl.style.display = !isLogin && currentSignUpStep === 2 ? 'block' : 'none'; signUpBackToStep1Btn.style.display = !isLogin && currentSignUpStep === 2 ? 'block' : 'none'; termsContainer.style.display = isLogin ? 'flex' : 'none'; fullNameInput.required = !isLogin && currentSignUpStep === 1; emailSignUpInput.required = !isLogin && currentSignUpStep === 1; emailLoginInput.required = isLogin; passwordInput.required = isLogin || (!isLogin && currentSignUpStep === 2); confirmPasswordInput.required = !isLogin && currentSignUpStep === 2; if (isLogin) { authBoxHeadingEl.textContent = 'Masuk'; authSubmitButton.textContent = 'Masuk'; loginLinksEl.style.display = 'block'; authFormBottomContentEl.style.display = 'block'; authToggleTextEl.innerHTML = `Belum punya akun? <a href="#" class="toggle-form-link btn-outline-link-style">Daftar</a>`; } else { authBoxHeadingEl.textContent = `Daftar Akun`; authSubmitButton.textContent = currentSignUpStep === 1 ? 'Selanjutnya' : 'Daftar'; loginLinksEl.style.display = 'none'; authFormBottomContentEl.style.display = 'block'; authToggleTextEl.innerHTML = `Sudah punya akun? <button class="toggle-form-link btn-outline-link-style">Masuk</button>`; } const toggleLink = authToggleTextEl.querySelector('.toggle-form-link'); if (toggleLink) { toggleLink.onclick = (e) => { e.preventDefault(); setAuthMode(isLogin ? 'signup' : 'login'); }; } updateButtonState(); }
+            function setAuthMode(mode) { currentAuthMode = mode; currentSignUpStep = 1; authContentWrapper.classList.add('fading'); setTimeout(() => { authForm.reset(); updateAuthFormDisplay(); authContentWrapper.classList.remove('fading'); }, 200); }
+            function setupPasswordToggle(inputId, toggleId) { const field = document.getElementById(inputId), icon = document.getElementById(toggleId); if (field && icon) { icon.addEventListener('click', function() { const type = field.getAttribute('type') === 'password' ? 'text' : 'password'; field.setAttribute('type', type); this.classList.toggle('fi-rr-eye'); this.classList.toggle('fi-rr-eye-crossed'); }); } }
+            document.querySelector('.page').classList.add('active'); setAuthMode('login'); setupPasswordToggle('password', 'togglePassword'); setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
+            emailLoginInput.addEventListener('input', updateButtonState); passwordInput.addEventListener('input', updateButtonState); termsCheckbox.addEventListener('change', updateButtonState);
+            notificationActionBtn.addEventListener('click', () => manageNotificationOverlay(false)); googleAuthBtn.addEventListener('click', () => showCustomNotification('Dalam Perbaikan', 'Mohon maaf, opsi masuk dengan Google sedang dalam pemeliharaan.')); forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); showCustomNotification('Dalam Perbaikan', 'Fitur lupa kata sandi sedang dalam pemeliharaan.'); }); guestLoginBtn.addEventListener('click', showGuestModal); termsLink.addEventListener('click', () => showModal('Ketentuan Layanan', termsContent)); privacyLink.addEventListener('click', () => showModal('Kebijakan Privasi', privacyContent)); signUpBackToStep1Btn.addEventListener('click', () => { currentSignUpStep = 1; authContentWrapper.classList.add('fading'); setTimeout(() => { updateAuthFormDisplay(); authContentWrapper.classList.remove('fading'); }, 200); });
+            
+            // === PERBAIKAN LOGIKA VALIDASI FORM ===
+            authForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Logika khusus untuk validasi langkah 1 pendaftaran
+                if (currentAuthMode === 'signup' && currentSignUpStep === 1) {
+                    if (!fullNameInput.checkValidity()) {
+                        fullNameInput.reportValidity();
+                        return;
+                    }
+                    if (!emailSignUpInput.checkValidity()) {
+                        emailSignUpInput.reportValidity();
+                        return;
+                    }
+                    // Jika valid, lanjutkan ke langkah 2
+                    currentSignUpStep = 2;
+                    updateAuthFormDisplay();
+                    return;
+                }
+
+                // Logika untuk submit final (Login atau langkah 2 pendaftaran)
+                if (currentAuthMode === 'login' && !termsCheckbox.checked) {
+                    showCustomNotification('Persetujuan Diperlukan', 'Anda harus menyetujui Ketentuan Layanan dan Kebijakan Privasi.');
+                    return;
+                }
+
+                if (!authForm.checkValidity()) {
+                    authForm.reportValidity();
+                    return;
+                }
+                
+                if (currentAuthMode === 'signup' && currentSignUpStep === 2 && passwordInput.value !== confirmPasswordInput.value) {
+                    showCustomNotification('Kesalahan', 'Konfirmasi kata sandi tidak cocok.');
+                    return;
+                }
+                
+                authSubmitButton.disabled = true;
+                authSubmitButton.textContent = 'Memproses...';
+                
+                const formData = new FormData();
+                formData.append('action', currentAuthMode);
+                if (currentAuthMode === 'login') {
+                    formData.append('email', emailLoginInput.value);
+                    formData.append('password', passwordInput.value);
+                } else {
+                    formData.append('fullName', fullNameInput.value);
+                    formData.append('email', emailSignUpInput.value);
+                    formData.append('password', passwordInput.value);
+                }
+                
+                let responseText = '';
+                try {
+                    // Karena tidak ada backend 'auth.php', blok ini akan selalu gagal dan masuk ke 'catch'
+                    // Ini adalah perilaku yang diharapkan untuk simulasi front-end
+                    const response = await fetch('auth.php', { method: 'POST', body: formData });
+                    responseText = await response.text();
+                    const result = JSON.parse(responseText);
+                    if (result.success) {
+                        if (currentAuthMode === 'signup') {
+                            showCustomNotification('Pendaftaran Berhasil', result.message, () => setAuthMode('login'));
+                        } else {
+                            showCustomNotification('Login Berhasil', result.message, () => { window.location.href = 'chat.html'; });
+                        }
+                    } else {
+                        showCustomNotification('Gagal', result.message);
+                    }
+                } catch (error) {
+                    // Blok ini akan dijalankan sebagai simulasi keberhasilan
+                    showCustomNotification('Simulasi Berhasil', 'Login/Daftar berhasil disimulasikan. Mengarahkan ke halaman chat...');
+                    console.error("Fetch GAGAL atau BUKAN JSON. Ini adalah simulasi front-end.");
+                    console.log(responseText); // Akan kosong, ini normal
+                    setTimeout(() => { window.location.href = 'chat.html'; }, 1500);
+                } finally {
+                    updateAuthFormDisplay();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

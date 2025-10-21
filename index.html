@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlabsWorld</title>
+
+    <!-- CDN Font dari Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CDN Ikon dari Flaticon -->
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.2/uicons-bold-rounded/css/uicons-bold-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.2/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.2/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+
+    <style>
+        /* CSS Lengkap dalam satu file */
+
+        /* 1. Definisi Variabel Warna & Font (Hanya Dark Mode) */
+        :root {
+            --bg-color: #0c0c0e; 
+            --surface-color: #18181B; 
+            --text-color: #e8eaed; 
+            --secondary-text-color: #a8adb4;
+            --border-color: #303134; 
+            
+            --overlay-menu-bg: rgba(0, 0, 0, 0.75);
+            --overlay-response-bg-val: 12, 12, 14; 
+            --overlay-response-alpha: 0.8;
+            
+            --glass-bg-dark: rgba(38, 38, 42, 0.45);
+            --glass-blur-dark: 8px; 
+            --glass-border-color-dark: rgba(60, 60, 65, 0.4); 
+            --glass-shadow-dark: 0 5px 15px -4px rgba(0,0,0,0.3), inset 0 0.3px 0.3px rgba(255,255,255,0.05); 
+            --glass-sheen-dark: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0) 100%);
+            --glass-icon-button-hover-bg-dark: rgba(52, 52, 57, 0.55);
+
+            --primary-btn-bg: #d1d3d6; 
+            --primary-btn-text: #0f0f12; 
+            --danger-color: #ff4d4d;
+
+            --text-color-rgb: 232, 234, 237; 
+            --bg-color-rgb: 12, 12, 14; 
+            --surface-color-rgb: 24, 24, 27;
+            --secondary-text-color-rgb: 168, 173, 180;
+            
+            --font-main: 'Poppins', sans-serif; 
+            --font-subtext-hero: 'Baloo 2', sans-serif; 
+            --font-alt: 'Roboto', sans-serif;
+            
+            --dot-grid-color: rgba(var(--secondary-text-color-rgb), 0.1); 
+            --dot-size: 1px;
+            --dot-spacing: 25px; 
+        }
+
+        /* 2. Reset CSS & Pengaturan Dasar Body */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { 
+            -webkit-tap-highlight-color: transparent; 
+            scrollbar-width: none; /* Firefox */
+        }
+        body { 
+            font-family: var(--font-main); 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            min-height: 100vh; 
+            position: relative; 
+            transition: background-color 0.3s, color 0.3s; 
+            -ms-overflow-style: none; /* IE 10+ */
+            overflow-x: hidden;
+        }
+        body::-webkit-scrollbar { display: none; }
+        
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        /* Background Layers */
+        body::before { 
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 130%, rgba(var(--secondary-text-color-rgb), 0.35) 0%, transparent 70%),
+                        radial-gradient(circle at 50% 50%, rgba(var(--secondary-text-color-rgb), 0.05) 0%, transparent 40%);
+            z-index: -3; pointer-events: none;
+        }
+        #dot-grid-background { 
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(var(--dot-grid-color) var(--dot-size), transparent var(--dot-size));
+            background-size: var(--dot-spacing) var(--dot-spacing);
+            z-index: -2;
+        }
+
+        #bottom-vignette {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; 
+            background: linear-gradient(to top, rgba(var(--bg-color-rgb), 0.4) 0%, rgba(var(--bg-color-rgb), 0) 100%);
+            z-index: 49; pointer-events: none; transition: background 0.3s;
+        }
+        
+        #initial-view-wrapper {
+            height: 100vh; display: flex; flex-direction: column; width: 100%;
+            position: sticky; top: 0; z-index: 10; 
+            transition: opacity 0.5s ease-out;
+        }
+        #initial-view-wrapper.fade-out { opacity: 0; pointer-events: none; }
+
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; }
+        
+        .header-company-info {
+            display: flex; align-items: center; gap: 8px; padding: 6px 12px; 
+            background: var(--glass-bg-dark); border: 1px solid var(--glass-border-color-dark); 
+            border-radius: 12px; color: var(--text-color); backdrop-filter: blur(var(--glass-blur-dark));
+            -webkit-backdrop-filter: blur(var(--glass-blur-dark)); box-shadow: var(--glass-shadow-dark);
+            position: relative; overflow: hidden; height: 36px; 
+        }
+        .header-company-info::before { 
+            content: ''; position: absolute; top: 0; left: -80%; width: 60%; height: 100%;
+            background: var(--glass-sheen-dark); transform: skewX(-25deg); pointer-events: none; opacity: 0.8;
+        }
+        .header-company-logo { height: 20px; width: auto; } 
+        .header-company-name { font-size: 0.9rem; font-weight: 600; } 
+        
+        nav { display: flex; align-items: center; gap: 8px; }
+        .icon-button { 
+            display: flex; justify-content: center; align-items: center; 
+            width: 36px; height: 36px; 
+            background: var(--glass-bg-dark); border: 1px solid var(--glass-border-color-dark); 
+            border-radius: 12px; color: var(--text-color); cursor: pointer; 
+            transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s; 
+            backdrop-filter: blur(var(--glass-blur-dark));
+            -webkit-backdrop-filter: blur(var(--glass-blur-dark)); box-shadow: var(--glass-shadow-dark);
+            position: relative; overflow: hidden;
+        }
+        .icon-button::before { 
+            content: ''; position: absolute; top: 0; left: -80%; width: 60%; height: 100%;
+            background: var(--glass-sheen-dark); transform: skewX(-25deg); pointer-events: none; opacity: 0.8;
+        }
+        .icon-button i { font-size: 16px; transform: translateY(1.5px); position: relative; z-index: 1; } 
+        .icon-button:hover { 
+            background-color: var(--glass-icon-button-hover-bg-dark); border-color: var(--text-color); 
+        }
+        
+        #music-toggle .music-bars, #music-toggle.active .music-off-icon { display: none; }
+        #music-toggle.active .music-bars, #music-toggle .music-off-icon { display: block; }
+
+        .music-bars { width: 18px; height: 18px; }
+        .music-bars .bar {
+            stroke: var(--text-color); stroke-width: 2.5; stroke-linecap: round;
+            transform-origin: 50% 100%;
+            animation: music-bar-anim 1.2s linear infinite alternate;
+        }
+        .music-bars .bar:nth-child(2) { animation-delay: -0.2s; }
+        .music-bars .bar:nth-child(3) { animation-delay: -0.4s; }
+        @keyframes music-bar-anim {
+            0% { transform: scaleY(0.1); } 25% { transform: scaleY(0.8); }
+            75% { transform: scaleY(0.4); } 100% { transform: scaleY(1); }
+        }
+
+        main.initial-content-area { 
+            flex-grow: 1; display: flex; flex-direction: column; align-items: center; 
+            justify-content: space-between; padding: 0 15px; width: 100%;
+            padding-top: 8vh; padding-bottom: 6vh;
+        }
+        .initial-content-center-wrapper {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 16px; width: 100%;
+        }
+        .hero-top-info {
+            display: flex; align-items: center; gap: 7px; 
+            font-size: clamp(10px, 1.8vw, 12px); font-weight: 500; 
+            color: var(--secondary-text-color);
+            padding: 5px 10px; background-color: var(--glass-bg-dark);
+            backdrop-filter: blur(var(--glass-blur-dark)); -webkit-backdrop-filter: blur(var(--glass-blur-dark));
+            border-radius: 8px; border: 1px solid var(--glass-border-color-dark);
+            box-shadow: var(--glass-shadow-dark); align-self: center; position: relative; overflow: hidden;
+        }
+        .hero-top-info::before {
+            content: ''; position: absolute; top: 0; left: -80%; width: 60%; height: 100%;
+            background: var(--glass-sheen-dark); transform: skewX(-25deg); pointer-events: none; opacity: 0.7;
+        }
+        .green-dot {
+            width: 7px; height: 7px; 
+            background-color: var(--text-color); 
+            border-radius: 50%;
+            animation: blink-animation 1.5s infinite ease-in-out;
+        }
+        @keyframes blink-animation { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        
+        .hero-title-container { 
+            display: flex; user-select: none;
+            justify-content: center; flex-wrap: wrap; gap: 0.2em 0.4em; 
+        }
+        .hero-title-word-wrapper { 
+            font-size: clamp(30px, 8vw, 60px); font-weight: 700; 
+            line-height: 1.15; color: var(--text-color); 
+            position: relative; white-space: nowrap; padding: 0.05em 0.15em; 
+        }
+        .hero-title-word-wrapper .word { 
+            display: inline-block; position: relative; 
+            filter: blur(8px); opacity: 0.5; transform: scale(0.9); 
+            transition: filter 0.8s ease-out, opacity 0.8s ease-out, transform 0.8s ease-out; 
+        }
+        .hero-title-word-wrapper .word.visible { filter: blur(0); opacity: 1; transform: scale(1); }
+        .hero-title-word-wrapper .corner { display: none; }
+
+        .subtitle { 
+            font-size: clamp(12px, 2.2vw, 15px); font-weight: 500; 
+            color: var(--secondary-text-color); max-width: 450px; 
+            line-height: 1.6; font-family: var(--font-subtext-hero);
+            text-align: center;
+        }
+        .chat-container { 
+            width: 100%; max-width: 520px; padding: 16px;
+            min-height: 140px; 
+            background: var(--glass-bg-dark); border-radius: 24px; 
+            border: 1px solid var(--glass-border-color-dark); 
+            backdrop-filter: blur(var(--glass-blur-dark)); -webkit-backdrop-filter: blur(var(--glass-blur-dark)); 
+            box-shadow: var(--glass-shadow-dark);
+            transition: background 0.3s, backdrop-filter 0.3s, box-shadow 0.3s, border-color 0.3s; 
+            display: flex; flex-direction: column; 
+            justify-content: center; 
+            position: relative; overflow: hidden; 
+        }
+        .chat-container::before {
+            content: ''; position: absolute; top: 0; left: -80%; width: 60%; height: 100%;
+            background: var(--glass-sheen-dark); transform: skewX(-25deg); pointer-events: none; opacity: 0.8; transition: opacity 0.3s;
+        }
+       
+        #initial-view { display: flex; flex-direction: column; width: 100%; position: relative; z-index: 1; flex-grow: 1; }
+        #chat-form {
+            display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;
+        }
+        .input-wrapper { display: flex; align-items: center; gap: 8px; }
+        .input-field { flex: 1; width: 100%; background: transparent; border: none; outline: none; padding: 6px 0; color: var(--text-color); font-family: var(--font-main); font-size: 14px; font-weight: 600; }
+        .input-field::placeholder { color: var(--secondary-text-color); font-weight: 600; opacity: 0.8; }
+        .char-counter { font-size: 10px; font-weight: 700; color: var(--secondary-text-color); transition: color 0.2s; white-space: nowrap; }
+        .char-counter.limit-exceeded { color: var(--danger-color); }
+        .chat-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; }
+        .try-chat-btn { 
+            background: var(--glass-bg-dark); border: 1px solid var(--glass-border-color-dark);
+            box-shadow: var(--glass-shadow-dark); backdrop-filter: blur(var(--glass-blur-dark));
+            -webkit-backdrop-filter: blur(var(--glass-blur-dark)); color: var(--text-color); 
+            font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 10px; 
+            font-family: var(--font-main); font-size: 0.85rem;
+            transition: background-color 0.2s, border-color 0.2s; position: relative; overflow: hidden;
+            display: flex; align-items: center; gap: 6px; flex-grow: 0; text-decoration: none;
+        }
+        .try-chat-btn svg { width: 14px; height: 14px; stroke: var(--text-color); stroke-width: 2.5; }
+        .try-chat-btn::before {
+            content: ''; position: absolute; top: 0; left: -80%; width: 60%; height: 100%;
+            background: var(--glass-sheen-dark); transform: skewX(-25deg); pointer-events: none; opacity: 0.7;
+        }
+        .try-chat-btn:hover { background-color: var(--glass-icon-button-hover-bg-dark); border-color: var(--text-color); }
+
+        .submit-button { min-width: 36px; }
+        .submit-button i { font-size: 16px; transform: translate(-0.5px, 2px); }
+        .submit-button:disabled { 
+            opacity: 0.5; cursor: not-allowed; 
+            background: var(--glass-bg-dark) !important; border-color: var(--glass-border-color-dark) !important;
+        }
+        
+        .extra-actions-container {
+            display: flex; gap: 10px; justify-content: center; align-items: center;
+            width: 100%; max-width: 520px;
+        }
+        .extra-action-btn {
+            padding: 8px 16px; font-size: 0.8rem; font-weight: 600;
+            border-radius: 10px; text-decoration: none; display: flex;
+            justify-content: center; align-items: center; gap: 8px;
+            transition: all 0.2s; cursor: pointer;
+            flex-grow: 0; flex-basis: auto; width: 48%;
+        }
+        .extra-action-btn svg { width: 14px; height: 14px; stroke-width: 2.5; }
+        .primary-extra-btn {
+            background: var(--glass-bg-dark); border: 1px solid var(--glass-border-color-dark);
+            box-shadow: var(--glass-shadow-dark); backdrop-filter: blur(var(--glass-blur-dark));
+            -webkit-backdrop-filter: blur(var(--glass-blur-dark)); color: var(--text-color);
+        }
+        .primary-extra-btn:hover { background-color: var(--glass-icon-button-hover-bg-dark); border-color: var(--text-color); }
+
+        .secondary-extra-btn {
+            background-color: transparent; border: 1px solid var(--border-color);
+            color: var(--secondary-text-color);
+        }
+        .secondary-extra-btn:hover { background-color: var(--surface-color); color: var(--text-color); }
+
+        #loading-view { display: none; justify-content: center; align-items: center; flex-grow: 1; width: 100%; position: relative; z-index: 1;}
+        .spinner { width: 28px; height: 28px; border: 3px solid var(--secondary-text-color); border-top-color: var(--text-color); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #response-prompt-view { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; width: 100%; flex-grow: 1; position: relative; z-index: 1;}
+        #show-results-btn { background: var(--primary-btn-bg); color: var(--primary-btn-text); border: none; padding: 8px 18px; border-radius: 10px; font-weight: 700; font-family: var(--font-main); cursor: pointer; font-size: 0.85rem; }
+
+        #menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay-menu-bg); z-index: 998; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0s 0.4s linear; pointer-events: none; }
+        #menu-overlay.show { opacity: 1; visibility: visible; transition-delay: 0s; pointer-events: auto; }
+        
+        #menu-modal { 
+            position: fixed; top: 50%; left: 50%;
+            width: 90vw; max-width: 420px; 
+            background-color: var(--surface-color); border-radius: 24px; z-index: 999; 
+            padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
+            display: flex; flex-direction: column; gap: 18px; 
+            visibility: hidden; 
+            border: 1.5px solid var(--border-color); min-height: 420px;
+            transform-origin: center center;
+            transform: translate(-50%, -50%) scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease;
+        }
+        #menu-modal.show { 
+            visibility: visible; 
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 1.2rem; font-weight: 800; color: var(--text-color); }
+        .modal-nav { flex-grow: 1; }
+        .modal-nav ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .modal-nav a { 
+            display: flex; align-items: center; gap: 16px; 
+            padding: 12px 16px; text-decoration: none; color: var(--text-color); 
+            font-weight: 600; border-radius: 12px; 
+            transition: background-color 0.2s; font-size: 1rem; 
+        }
+        .modal-nav a i { font-size: 20px; color: var(--secondary-text-color); transform: translateY(2px); }
+        .modal-nav a:hover { background-color: rgba(128,128,128,0.08); }
+        
+        .modal-footer { display: flex; justify-content: center; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color); }
+        .connect-instagram-btn-link { text-decoration: none; display: inline-block; }
+        .connect-instagram-btn { 
+            background-color: var(--primary-btn-bg); color: var(--primary-btn-text); border: none; 
+            padding: 10px 22px; border-radius: 10px; 
+            font-family: var(--font-main); font-weight: 700; font-size: 0.95rem; 
+            cursor: pointer; transition: opacity 0.2s; display: flex; align-items: center; gap: 10px; 
+        }
+        .connect-instagram-btn svg { width: 18px; height: 18px; fill: var(--primary-btn-text); }
+        .connect-instagram-btn:hover { opacity: 0.85; }
+        
+        .supported-tech-wrapper { 
+            width: 100%; display: flex; flex-direction: column; 
+            align-items: center; gap: 10px; position: relative;
+            padding-bottom: clamp(70px, 30vh, 20px); 
+        }
+        .supported-by-title { font-size: clamp(14px, 3vw, 18px); font-weight: 700; color: var(--secondary-text-color); }
+        .supported-tech-container { 
+            width: 100vw; overflow: hidden; position: relative; 
+            padding: 10px 0; 
+            -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+        }
+        
+        .marquee { display: flex; }
+        .marquee-content { display: flex; white-space: nowrap; animation: marquee-scroll 45s linear infinite; will-change: transform; } 
+        .marquee-item { display: flex; align-items: center; padding: 0 25px; }
+        .marquee-item span { font-size: clamp(20px, 4.5vw, 28px); font-weight: 800; color: var(--secondary-text-color); opacity: 0.8; transition: color 0.3s, opacity 0.3s; }
+        .marquee-item:hover span { color: var(--text-color); opacity: 1; }
+        @keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        #response-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(var(--overlay-response-bg-val), var(--overlay-response-alpha)); z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s 0.3s linear, background-color 0.3s ease; pointer-events: none; }
+        #response-overlay.show { opacity: 1; visibility: visible; transition-delay: 0s; pointer-events: auto; }
+        .response-modal-container { 
+            position: fixed; bottom: 0; left: 0; width: 100%; max-height: 85vh; 
+            background-color: var(--surface-color); border-top-left-radius: 20px; border-top-right-radius: 20px; 
+            box-shadow: 0 -5px 30px rgba(0,0,0,0.2); z-index: 1001; 
+            display: flex; flex-direction: column; transform: translateY(100%); 
+            opacity: 1; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease-out; 
+            padding: 0; border-top: 2px solid var(--border-color); touch-action: none; 
+        }
+        .response-modal-container.show { transform: translateY(0); opacity: 1;}
+        .response-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--border-color); position: relative; cursor: grab; }
+        .response-modal-header:active { cursor: grabbing; }
+        .response-modal-drag-handle { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 40px; height: 5px; background-color: var(--secondary-text-color); border-radius: 3px; z-index: 5; pointer-events: none; }
+        .response-modal-title { font-size: 1rem; font-weight: 700; color: var(--text-color); flex-grow: 1; pointer-events: none; user-select: none; }
+        .response-modal-header-actions { display: flex; gap: 8px; margin-left: auto; z-index: 5; }
+        #copy-response-btn, #report-issue-btn { width: 34px; height: 34px; border-radius: 10px; }
+        #copy-response-btn i, #report-issue-btn i { font-size: 14px; }
+        
+        .modal-api-response-scrollable { flex-grow: 1; overflow-y: auto; padding: 12px 18px; margin-bottom: 0; }
+        #modal-api-response-content { line-height: 1.5; font-weight: 500; white-space: pre-wrap; word-wrap: break-word; font-family: var(--font-alt); font-size: 0.9rem; }
+        #modal-api-response-content p { margin-bottom: 0.5em; }
+        #modal-api-response-content ul { padding-left: 25px; list-style-position: outside; margin-bottom: 0.5em; }
+        #modal-api-response-content li { margin-bottom: 0.25em; }
+        #modal-api-response-content b, #modal-api-response-content strong { font-weight: 700; color: var(--text-color); }
+        #modal-api-response-content i, #modal-api-response-content em { font-style: italic; }
+        
+        .response-modal-footer { padding: 8px 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .response-modal-footer .try-chat-btn-modal { padding: 8px 14px; font-size: 0.85rem; border-radius: 10px; }
+        .response-modal-footer .try-chat-btn-modal svg { width: 13px; height: 13px; }
+        #modal-ask-again-btn { 
+            background: var(--primary-btn-bg); color: var(--primary-btn-text); border: none; 
+            padding: 8px 16px; border-radius: 10px; font-weight: 700; 
+            font-family: var(--font-main); cursor: pointer; font-size: 0.85rem;
+        }
+
+        #fps-counter, #recording-timer {
+            position: fixed; bottom: 10px; font-family: 'Roboto Mono', monospace;
+            font-size: 11px; font-weight: 700; color: var(--text-color);
+            background-color: transparent; padding: 4px 10px; z-index: 50;
+            user-select: none; text-shadow: 0 1px 6px rgba(var(--bg-color-rgb), 0.7);
+            transition: color 0.3s, opacity 0.5s; opacity: 0; 
+        }
+        #fps-counter.show, #recording-timer.show { opacity: 1; }
+        #fps-counter { left: 10px; }
+        #recording-timer { right: 10px; }
+
+        #scroll-prompt-container {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 50; opacity: 1; transition: opacity 0.4s ease-out;
+            background-color: rgba(var(--surface-color-rgb), 0.5); backdrop-filter: blur(5px);
+            border-radius: 12px; border: 1.5px solid var(--border-color);
+            overflow: hidden; padding: 1.5px;
+        }
+        #scroll-prompt-progress-bar {
+            position: absolute; top: 0; left: 0; height: 100%; width: 0%; 
+            background-color: var(--text-color); border-radius: 12px; transition: width 0.1s linear;
+        }
+        #scroll-prompt-text {
+            position: relative; z-index: 2; font-family: var(--font-main); font-weight: 600; font-size: 12px;
+            padding: 3px 10px; mix-blend-mode: difference; color: var(--text-color);
+        }
+        #scroll-prompt-container.fade-out { opacity: 0; pointer-events: none; }
+        
+        #pin-container { position: relative; width: 100%; } 
+        #scroll-reveal-container {
+            height: 100vh; width: 100%; position: sticky; top: 0; z-index: 20;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease-in;
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        #scroll-reveal-container.show { opacity: 1; pointer-events: auto; }
+
+        #scroll-reveal-fixed-ui {
+            position: fixed; top: 10px; left: 16px; right: 16px; z-index: 56;
+            height: 36px;
+            display: flex; justify-content: space-between; align-items: center;
+            pointer-events: none; opacity: 0; transition: opacity 0.5s ease;
+        }
+        #scroll-reveal-fixed-ui.show { opacity: 1; pointer-events: auto; }
+        #scroll-reveal-fixed-ui .header-company-info, 
+        #scroll-reveal-fixed-ui .icon-button {
+             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .scroll-scene {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; 
+            padding: 0 7%; opacity: 0; 
+            transition: opacity 0.5s ease-out; 
+            pointer-events: none;
+        }
+        .scroll-scene.active { opacity: 1; pointer-events: auto; }
+        .scene-content-wrapper {
+            width: 100%; max-width: 900px;
+            position: relative;
+        }
+        .scene-heading {
+            font-family: var(--font-main); font-size: clamp(40px, 7vw, 75px); 
+            font-weight: 700; line-height: 1.15; margin-bottom: 20px; 
+            text-align: left; width: 100%; 
+        }
+        .scene-subtext {
+            font-family: var(--font-subtext-hero); 
+            font-size: clamp(15px, 2.1vw, 20px); 
+            font-weight: 500; color: var(--secondary-text-color);
+            line-height: 1.6; width: 100%;
+            text-align: left;
+        }
+        .word-token { display: inline-block; opacity: 0.2; transition: opacity 0.25s ease-out; }
+        .word-token.is-word-revealed { opacity: 1; }
+        
+        .scene-top-info {
+            display: flex; align-items: center; gap: 7px; 
+            font-size: clamp(10px, 1.8vw, 12px); font-weight: 500; 
+            color: var(--secondary-text-color);
+            padding: 5px 10px; background-color: var(--surface-color);
+            border-radius: 8px; border: 1px solid var(--border-color);
+            position: absolute; top: -45px; left: 0;
+        }
+        
+        #cards-scene .scene-heading { font-size: clamp(24px, 5vw, 40px); text-align: left; margin-bottom: 15px; }
+        #cards-scene .scene-subtext { text-align: left; font-size: clamp(14px, 2.2vw, 18px); }
+        #cards-scene .scene-content-wrapper { margin-top: -45vh; }
+        #cards-scene .scene-top-info { left: 0; top: -40px; }
+
+        .cards-display-area {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center; 
+            perspective: 2000px; margin-top: 5vh; 
+        }
+
+        .feature-card {
+            position: absolute; 
+            left: 50%; 
+            width: clamp(280px, 25vw, 340px); 
+            min-height: clamp(380px, 45vh, 420px);
+            border: 1px solid var(--border-color); 
+            border-radius: 24px;
+            padding: clamp(25px, 2.5vw, 35px);
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            box-shadow: 0 10px 30px -8px rgba(0,0,0,0.25); 
+            overflow: hidden;
+            opacity: 0; 
+            transform: translateX(-50%) translateY(70vh) scale(0.6) rotate(0deg); 
+            transform-origin: center center;
+            will-change: transform, opacity, background;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, background 0.3s ease;
+            
+            background: var(--surface-color); /* Fallback */
+        }
+        
+        #feature-card-1 { background: radial-gradient(circle at 50% 0%, rgba(66, 245, 176, 0.15) 0%, transparent 70%), var(--surface-color); }
+        #feature-card-2 { background: radial-gradient(circle at 50% 0%, rgba(245, 176, 66, 0.15) 0%, transparent 70%), var(--surface-color); }
+        #feature-card-3 { background: radial-gradient(circle at 50% 0%, rgba(66, 158, 245, 0.15) 0%, transparent 70%), var(--surface-color); }
+        #feature-card-4 { background: radial-gradient(circle at 50% 0%, rgba(215, 66, 245, 0.15) 0%, transparent 70%), var(--surface-color); }
+        #feature-card-5 { background: radial-gradient(circle at 50% 0%, rgba(245, 66, 66, 0.15) 0%, transparent 70%), var(--surface-color); }
+
+        .feature-card.is-settled {
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease;
+        }
+
+        .feature-card .card-icon {
+            font-size: clamp(38px, 5vw, 52px);
+            margin-bottom: clamp(15px, 2vh, 20px);
+            transition: color 0.3s, filter 0.3s;
+        }
+        #feature-card-1 .card-icon { color: #42f5b0; filter: drop-shadow(0 0 15px #42f5b0); }
+        #feature-card-2 .card-icon { color: #f5b042; filter: drop-shadow(0 0 15px #f5b042); }
+        #feature-card-3 .card-icon { color: #429ef5; filter: drop-shadow(0 0 15px #429ef5); }
+        #feature-card-4 .card-icon { color: #d742f5; filter: drop-shadow(0 0 15px #d742f5); }
+        #feature-card-5 .card-icon { color: #f54242; filter: drop-shadow(0 0 15px #f54242); }
+
+        .feature-card h3 { font-size: clamp(1.1em, 2vw, 1.4em); margin-bottom: clamp(10px, 1.5vh, 15px); color: var(--text-color); font-weight: 700; }
+        .feature-card p { font-size: clamp(0.85em, 1.8vw, 0.95em); color: var(--secondary-text-color); line-height: 1.6; flex-grow: 1; }
+        
+        #scroll-timeline {
+            position: fixed; top: 10px; left: 50%; height: 36px;
+            transform: translateX(-50%);
+            z-index: 55; display: flex; align-items: center; gap: 5px; 
+            padding: 5px 8px; background-color: rgba(var(--surface-color-rgb), 0.5);
+            backdrop-filter: blur(8px); border-radius: 18px; border: 1px solid var(--border-color);
+            opacity: 0; pointer-events: none; transition: opacity 0.5s ease-out; user-select: none;
+        }
+        #scroll-timeline.show { opacity: 1; pointer-events: auto; }
+        .timeline-checkpoint {
+            font-family: var(--font-main); font-weight: 700; font-size: 12px; 
+            width: 24px; height: 24px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; background-color: var(--surface-color);
+            border: 1.5px solid var(--border-color); color: var(--secondary-text-color);
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
+            position: relative; overflow: hidden; z-index: 1;
+        }
+        .timeline-checkpoint.active {
+            background-color: var(--text-color); border-color: var(--text-color); color: var(--bg-color);
+        }
+        .timeline-checkpoint::before {
+            content: ""; position: absolute; z-index: -1;
+            inset: -2px; border-radius: inherit;
+            background: conic-gradient(from var(--angle), transparent 20%, var(--primary-btn-bg), transparent 80%);
+            opacity: 0; transition: opacity 0.3s;
+            animation: spin-glow 4s linear infinite paused;
+        }
+        .timeline-checkpoint.active-glow::before {
+            opacity: 1; animation-play-state: running;
+        }
+        @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+        @keyframes spin-glow { to { --angle: 360deg; } }
+
+
+        .timeline-progress-bar {
+            width: 45px; height: 3.5px; background-color: var(--border-color);
+            border-radius: 2px; overflow: hidden;
+        }
+        .timeline-progress-bar-inner {
+            height: 100%; width: 0%; background-color: var(--text-color);
+            border-radius: 2px; transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+    <audio id="background-music" src="music/backsound.mp3" loop></audio>
+    <div id="shooting-star"></div>
+    <div id="dot-grid-background"></div>
+    <div id="bottom-vignette"></div>
+    <div id="fps-counter">FPS [ 0 ]</div> <div id="recording-timer">REC 00:00:00</div>
+    <div id="scroll-prompt-container">
+        <div id="scroll-prompt-progress-bar"></div>
+        <div id="scroll-prompt-text">Scroll untuk Lanjut</div>
+    </div>
+    
+    <div id="scroll-timeline">
+        <div id="timeline-cp-1" class="timeline-checkpoint">1</div>
+        <div class="timeline-progress-bar"><div id="timeline-bar-1" class="timeline-progress-bar-inner"></div></div>
+        <div id="timeline-cp-2" class="timeline-checkpoint">2</div>
+        <div class="timeline-progress-bar"><div id="timeline-bar-2" class="timeline-progress-bar-inner"></div></div>
+        <div id="timeline-cp-3" class="timeline-checkpoint">3</div>
+    </div>
+
+    <!-- UI Tetap saat Scroll Reveal -->
+    <div id="scroll-reveal-fixed-ui">
+        <div class="header-company-info" id="scroll-reveal-logo">
+             <img src="https://s6.imgcdn.dev/YsWz8D.png" alt="FlabsAI Logo" class="header-company-logo">
+        </div>
+        <button class="icon-button" id="scroll-reveal-menu-toggle" aria-label="Buka Menu"> <i class="fi fi-br-menu-burger"></i> </button>
+    </div>
+
+    <div id="menu-overlay"></div>
+    <div id="menu-modal">
+        <div class="modal-header"> <h3 class="modal-title">MENU NAVIGASI</h3> <button class="icon-button" id="close-menu-btn" aria-label="Tutup Menu"> <i class="fi fi-br-cross"></i> </button> </div>
+        <nav class="modal-nav"> <ul> <li><a href="#"><i class="fi fi-rr-book-alt"></i> <span>Perpustakaan</span></a></li> <li><a href="#"><i class="fi fi-rr-database"></i> <span>Server</span></a></li> <li><a href="#"><i class="fi fi-rr-tags"></i> <span>Harga</span></a></li> <li><a href="#"><i class="fi fi-rr-envelope"></i> <span>Kontak</span></a></li> <li><a href="#"><i class="fi fi-rr-headset"></i> <span>Pusat Bantuan</span></a></li> </ul> </nav>
+        <div class="modal-footer"> <a href="https://www.instagram.com/femzlabs_" target="_blank" rel="noopener noreferrer" class="connect-instagram-btn-link"> <button class="connect-instagram-btn"> <svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></g></svg> <span>Connect on Instagram</span> </button> </a> </div>
+    </div>
+
+    <div id="response-overlay"></div> 
+    <div id="response-modal" class="response-modal-container">
+        <div class="response-modal-header" id="response-modal-draggable-header"> <div class="response-modal-drag-handle"></div> <h3 class="response-modal-title">Jawaban AI</h3> <div class="response-modal-header-actions"> <button id="copy-response-btn" class="icon-button" aria-label="Salin Jawaban"> <i class="fi fi-rr-copy-alt"></i> </button> <button id="report-issue-btn" class="icon-button" aria-label="Laporkan Masalah"> <i class="fi fi-rr-comment-exclamation"></i> </button> </div> </div>
+        <div id="modal-api-response-content" class="modal-api-response-scrollable"></div>
+        <div class="response-modal-footer"> <a href="chat.html" id="try-chat-btn-modal" class="try-chat-btn try-chat-btn-modal">ChatAI <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"></path></svg></a> <button id="modal-ask-again-btn">Tanya Lagi</button> </div>
+    </div>
+
+    <div id="initial-view-wrapper">
+        <header>
+            <div class="header-company-info">
+                <img src="https://s6.imgcdn.dev/YsWz8D.png" alt="FlabsAI Logo" class="header-company-logo">
+                <span class="header-company-name">FlabsWorld</span>
+            </div>
+            <nav>
+                <button class="icon-button" id="music-toggle" aria-label="Musik On/Off">
+                    <i class="fi fi-rr-volume-slash music-off-icon"></i>
+                    <svg class="music-bars" viewBox="0 0 16 16"><g><path class="bar" d="M 2 13 L 2 3"></path><path class="bar" d="M 5 13 L 5 3"></path><path class="bar" d="M 8 13 L 8 3"></path><path class="bar" d="M 11 13 L 11 3"></path><path class="bar" d="M 14 13 L 14 3"></path></g></svg>
+                </button>
+                <button class="icon-button" id="menu-toggle" aria-label="Buka Menu"> <i class="fi fi-br-menu-burger"></i> </button>
+            </nav>
+        </header>
+        <main class="initial-content-area"> 
+            <div class="initial-content-center-wrapper">
+                <div class="hero-top-info"> <span class="green-dot"></span> <span>Inovasi AI Terdepan</span> </div>
+                <div class="hero-title-container" id="hero-main-title"> <!-- Kata-kata akan di-generate oleh JS --> </div>
+                <p class="subtitle">Solusi cerdas untuk kreativitas dan produktivitas tanpa batas. Optimalkan alur kerja Anda hari ini.</p>
+                <div class="chat-container">
+                    <div id="initial-view">
+                        <form id="chat-form">
+                            <div class="input-wrapper"> <input type="text" id="chat-input" class="input-field" placeholder="Tanyakan apa saja..."> <span id="char-counter" class="char-counter">0/25</span> </div>
+                            <div class="chat-actions"> 
+                                <a href="chat.html" id="main-try-chat-btn" class="try-chat-btn">ChatAI <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"></path></svg></a> 
+                                <button type="submit" id="submit-btn" class="icon-button submit-button" aria-label="Kirim"> <i class="fi fi-sr-paper-plane"></i> </button> 
+                            </div>
+                        </form>
+                    </div>
+                    <div id="loading-view"> <div class="spinner"></div> </div>
+                    <div id="response-prompt-view"> <button id="show-results-btn">Lihat Hasil</button> </div>
+                </div>
+                <div class="extra-actions-container">
+                    <a href="login.html" class="extra-action-btn primary-extra-btn">Alat Lainnya <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"></path></svg></a>
+                    <a href="#" class="extra-action-btn secondary-extra-btn">Service</a>
+                </div>
+            </div>
+
+            <div class="supported-tech-wrapper">
+                <p class="supported-by-title">Didukung oleh</p>
+                <div class="supported-tech-container">
+                    <div class="marquee">
+                        <div class="marquee-content">
+                            <div class="marquee-item"><span>AWS</span></div> <div class="marquee-item"><span>Google Cloud</span></div> <div class="marquee-item"><span>Gemini AI</span></div> <div class="marquee-item"><span>Pollinations AI</span></div> <div class="marquee-item"><span>OpenAI GPT</span></div> <div class="marquee-item"><span>Microsoft Azure</span></div> <div class="marquee-item"><span>Hugging Face</span></div>
+                            <div class="marquee-item"><span>AWS</span></div> <div class="marquee-item"><span>Google Cloud</span></div> <div class="marquee-item"><span>Gemini AI</span></div> <div class="marquee-item"><span>Pollinations AI</span></div> <div class="marquee-item"><span>OpenAI GPT</span></div> <div class="marquee-item"><span>Microsoft Azure</span></div> <div class="marquee-item"><span>Hugging Face</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="pin-container">
+        <div id="scroll-reveal-container">
+            <div class="scroll-scene" data-scene="1">
+                <div class="scene-content-wrapper">
+                    <div class="scene-top-info"><span class="green-dot"></span><span>Apa itu FlabsWorld?</span></div>
+                    <h2 class="scene-heading">Selamat Datang di Era Baru.</h2>
+                    <p class="scene-subtext">FlabsWorld adalah platform terdepan yang membuka pintu ke kemungkinan tak terbatas. Kami memberdayakan inovasi melalui kecerdasan buatan yang intuitif, canggih, dan mudah diakses oleh semua kalangan.</p>
+                </div>
+            </div>
+            <div class="scroll-scene" data-scene="2">
+                <div class="scene-content-wrapper">
+                    <div class="scene-top-info"><span class="green-dot"></span><span>Apa itu FlabsWorld?</span></div>
+                    <h2 class="scene-heading">Inovasi di Ujung Jari Anda.</h2>
+                    <p class="scene-subtext">Dari analisis data kompleks hingga pembuatan konten kreatif, alat-alat kami dirancang untuk mengoptimalkan alur kerja Anda dan memicu ide-ide brilian. Temukan kekuatan sejati data Anda.</p>
+                </div>
+            </div>
+            <div class="scroll-scene" data-scene="3">
+                <div class="scene-content-wrapper">
+                    <div class="scene-top-info"><span class="green-dot"></span><span>Apa itu FlabsWorld?</span></div>
+                    <h2 class="scene-heading">Masa Depan adalah Kolaborasi.</h2>
+                    <p class="scene-subtext">Bergabunglah dengan komunitas para visioner, pengembang, dan profesional yang membentuk masa depan. Mari kita ciptakan solusi luar biasa, bersama FlabsWorld.</p>
+                </div>
+            </div>
+            
+            <div class="scroll-scene" data-scene="cards" id="cards-scene">
+                <div class="scene-content-wrapper">
+                    <div class="scene-top-info"><span class="green-dot"></span><span>Sukses</span></div>
+                    <h2 class="scene-heading">Level Up Bisnismu, Unlock Potensimu!</h2>
+                    <p class="scene-subtext">Kepoin deretan solusi AI dari FlabsWorld yang siap bikin gebrakan di industrimu. Yuk, jadi yang terdepan!</p>
+                </div>
+                <div class="cards-display-area">
+                    <div class="feature-card" id="feature-card-1">
+                        <i class="fi fi-rr-chart-histogram card-icon"></i>
+                        <h3>Analisis Data Cerdas</h3>
+                        <p>Ubah tumpukan data mentah menjadi wawasan strategis yang actionable dengan kekuatan AI prediktif untuk pengambilan keputusan yang lebih cepat dan akurat.</p>
+                    </div>
+                    <div class="feature-card" id="feature-card-2">
+                        <i class="fi fi-rr-pencil-paintbrush card-icon"></i>
+                        <h3>Konten Kreatif Otomatis</h3>
+                        <p>Hasilkan teks pemasaran, artikel blog, skrip video, hingga balasan email yang menarik, orisinal, dan disesuaikan dengan brand voice Anda dalam hitungan detik.</p>
+                    </div>
+                    <div class="feature-card" id="feature-card-3">
+                         <i class="fi fi-rr-gears card-icon"></i>
+                        <h3>Optimasi Proses Bisnis</h3>
+                        <p>Automasi tugas-tugas repetitif dan alur kerja yang kompleks, tingkatkan efisiensi operasional, dan bebaskan tim Anda untuk fokus pada inovasi dan pertumbuhan.</p>
+                    </div>
+                    <div class="feature-card" id="feature-card-4">
+                        <i class="fi fi-rr-users-alt card-icon"></i>
+                        <h3>Personalisasi Canggih</h3>
+                        <p>Sajikan pengalaman yang unik, dinamis, dan sangat relevan untuk setiap pelanggan Anda di semua titik interaksi digital, meningkatkan engagement dan loyalitas.</p>
+                    </div>
+                    <div class="feature-card" id="feature-card-5">
+                        <i class="fi fi-rr-shield-check card-icon"></i>
+                        <h3>Keamanan & Kepatuhan</h3>
+                        <p>Lindungi data Anda dengan platform AI yang aman dan andal. Dibangun dengan protokol keamanan terdepan untuk memastikan kepatuhan dan ketenangan pikiran.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            const heroMainTitleContainer = document.getElementById('hero-main-title');
+            const titleText = "FlabsWorld - Inovasi Tanpa Batas"; 
+            const words = titleText.split(" ");
+            let wordAnimationTimeout;
+            let isWordAnimationActive = true;
+
+            function createHeroTitleWords() { 
+                if (!heroMainTitleContainer) return;
+                heroMainTitleContainer.innerHTML = ''; 
+                words.forEach(wordText => {
+                    const wordWrapper = document.createElement('div');
+                    wordWrapper.classList.add('hero-title-word-wrapper');
+                    const wordSpan = document.createElement('span');
+                    wordSpan.classList.add('word');
+                    wordSpan.textContent = wordText;
+                    wordWrapper.appendChild(wordSpan);
+                    heroMainTitleContainer.appendChild(wordWrapper);
+                });
+            }
+            function animateHeroTitleWords() { 
+                if (!isWordAnimationActive || !heroMainTitleContainer) return;
+                const wordSpans = heroMainTitleContainer.querySelectorAll('.hero-title-word-wrapper .word');
+                if (wordSpans.length === 0) return;
+                clearTimeout(wordAnimationTimeout);
+                wordSpans.forEach(span => { span.classList.remove('visible'); });
+                let wordDelay = 0;
+                wordSpans.forEach((span) => {
+                    setTimeout(() => {
+                        if (!isWordAnimationActive) return;
+                        span.classList.add('visible');
+                    }, wordDelay);
+                    wordDelay += 200; 
+                });
+                wordAnimationTimeout = setTimeout(() => {
+                    if (!isWordAnimationActive) return;
+                    wordSpans.forEach(span => { span.classList.remove('visible'); });
+                    setTimeout(animateHeroTitleWords, 1500); 
+                }, wordDelay + 2500); 
+            }
+            
+            const musicToggle = document.getElementById('music-toggle');
+            const backgroundMusic = document.getElementById('background-music');
+
+            musicToggle.addEventListener('click', () => { 
+                musicToggle.classList.toggle('active'); 
+                if (backgroundMusic.paused) {
+                    backgroundMusic.play();
+                } else {
+                    backgroundMusic.pause();
+                }
+            });
+
+            const menuToggle = document.getElementById('menu-toggle');
+            const scrollRevealMenuToggle = document.getElementById('scroll-reveal-menu-toggle');
+            const closeMenuBtn = document.getElementById('close-menu-btn');
+            const menuModal = document.getElementById('menu-modal');
+            const menuOverlay = document.getElementById('menu-overlay'); 
+
+            function openMenu() { 
+                menuOverlay.classList.add('show');
+                menuModal.classList.add('show');
+            }
+            function closeMenu() { 
+                menuOverlay.classList.remove('show'); 
+                menuModal.classList.remove('show');
+            }
+
+            [menuToggle, scrollRevealMenuToggle].forEach(btn => btn.addEventListener('click', openMenu));
+            [closeMenuBtn, menuOverlay].forEach(el => el.addEventListener('click', closeMenu));
+            menuModal.addEventListener('click', (e) => e.stopPropagation());
+
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const charCounter = document.getElementById('char-counter'); 
+            const mainTryChatBtn = document.getElementById('main-try-chat-btn');
+            const initialViewEl = document.getElementById('initial-view');
+            const loadingView = document.getElementById('loading-view');
+            const responsePromptView = document.getElementById('response-prompt-view');
+            const showResultsBtn = document.getElementById('show-results-btn');
+            const MAX_CHARS = 25; 
+            let currentApiResponseText = ""; 
+            
+            const API_KEY = "AIzaSyCABGEFl5t2vimo69p6JrJr0kHVI5HujmE";
+            const MODEL_NAME = "gemini-2.5-flash-lite";
+            
+            async function callGeminiAPI(queryFromUser) { 
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+                
+                const requestBody = { 
+                    contents: [{ 
+                        parts: [{ text: queryFromUser }] 
+                    }] 
+                };
+                
+                try {
+                    const response = await fetch(API_URL, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify(requestBody) 
+                    });
+
+                    if (API_KEY === "GANTI_DENGAN_API_KEY_ANDA_YANG_VALID") {
+                        return `<p style="color:var(--danger-color);"><b>Kesalahan Konfigurasi:</b> Anda belum memasukkan API Key yang valid. Silakan edit file HTML ini dan ganti placeholder <b>"GANTI_DENGAN_API_KEY_ANDA_YANG_VALID"</b> dengan kunci API Anda dari Google AI Studio.</p>`;
+                    }
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.candidates || data.candidates.length === 0 || !data.candidates[0].content) {
+                        console.error("API Error or Malformed Response:", data);
+                        let errorMessage = `Permintaan API gagal (${response.status} ${response.statusText})`;
+                        if (data?.error?.message) errorMessage += `: ${data.error.message}`;
+                        else if (data?.promptFeedback?.blockReason) errorMessage += `. Permintaan diblokir karena: ${data.promptFeedback.blockReason}`;
+                        else if (data?.candidates?.[0]?.finishReason && data.candidates[0].finishReason !== "STOP") errorMessage += `. Selesai dengan alasan: ${data.candidates[0].finishReason}`;
+                        else errorMessage += ". Respons tidak valid atau tidak ada konten.";
+                        return `<p style="color:var(--danger-color);">${errorMessage}</p><p>Coba pertanyaan lain atau periksa konfigurasi API Key dan model Anda.</p>`;
+                    }
+                    
+                    const text = data.candidates[0].content.parts[0]?.text;
+                    
+                    if (!text) {
+                        let noTextReason = "Model tidak memberikan jawaban atau format respons tidak sesuai.";
+                        if (data.candidates[0].finishReason === "SAFETY") noTextReason = "Model tidak memberikan jawaban karena pertanyaan Anda mungkin melanggar kebijakan keamanan.";
+                        else if (data.promptFeedback?.blockReason) noTextReason = `Permintaan diblokir karena: ${data.promptFeedback.blockReason}.`;
+                        console.warn("API Response (tidak ada teks yang diterima):", data);
+                        return `<p>${noTextReason} Coba pertanyaan lain.</p>`;
+                    }
+                    return text;
+                } catch (error) {
+                    console.error("Error dalam callGeminiAPI:", error);
+                    return `<p style="color:var(--danger-color);">Maaf, terjadi kesalahan saat menghubungi AI: ${error.message}</p><p>Silakan periksa koneksi internet Anda dan pastikan API Key serta model API telah dikonfigurasi dengan benar.</p>`;
+                }
+            }
+            
+            chatInput.addEventListener('input', () => { 
+                const charCount = chatInput.value.length; charCounter.textContent = `${charCount}/${MAX_CHARS}`;
+                charCounter.classList.toggle('limit-exceeded', charCount > MAX_CHARS);
+                submitBtn.disabled = charCount === 0 || charCount > MAX_CHARS; 
+            });
+
+            chatForm.addEventListener('submit', async (e) => { 
+                e.preventDefault(); 
+                let query = chatInput.value.trim(); 
+                if (!query || submitBtn.disabled) return;
+                
+                initialViewEl.style.display = 'none'; 
+                loadingView.style.display = 'flex'; 
+                responsePromptView.style.display = 'none'; 
+                
+                const systemInstruction = "Format jawaban Anda secara eksklusif menggunakan tag HTML standar. Gunakan <b> untuk teks tebal, <i> untuk teks miring. Untuk daftar, gunakan <ul> dengan setiap item dalam <li> sendiri. Jangan gunakan Markdown. Buat jawaban ringkas, informatif, dan mudah dibaca.";
+                const queryWithInstructions = `${query}\n\n---\n${systemInstruction}`;
+                
+                currentApiResponseText = await callGeminiAPI(queryWithInstructions); 
+                
+                loadingView.style.display = 'none'; 
+                responsePromptView.style.display = 'flex'; 
+            });
+
+            const responseModal = document.getElementById('response-modal');
+            const responseOverlayRM = document.getElementById('response-overlay');
+            const modalApiResponseContent = document.getElementById('modal-api-response-content');
+            const modalAskAgainBtn = document.getElementById('modal-ask-again-btn');
+            const copyResponseBtn = document.getElementById('copy-response-btn');
+            const reportIssueBtn = document.getElementById('report-issue-btn');
+            const draggableResponseHeader = document.getElementById('response-modal-draggable-header');
+            
+            let isDraggingResponseModal = false; 
+            let responseModalDragStartY, responseModalInitialTranslateY;
+            
+            function openResponseModal() { 
+                document.body.classList.add('modal-open'); 
+                modalApiResponseContent.innerHTML = currentApiResponseText; 
+                if(modalApiResponseContent) modalApiResponseContent.scrollTop = 0; 
+                
+                responseModal.style.transform = '';
+                responseModal.style.opacity = '';
+                responseOverlayRM.style.opacity = '';
+                
+                responseOverlayRM.classList.add('show');
+                responseModal.classList.add('show'); 
+            }
+
+            function closeResponseModal() { 
+                document.body.classList.remove('modal-open');
+                
+                responseModal.style.transform = '';
+                responseModal.style.opacity = '';
+                responseOverlayRM.style.opacity = '';
+                
+                responseModal.classList.remove('show'); 
+                responseOverlayRM.classList.remove('show');
+            }
+            
+            draggableResponseHeader.addEventListener('pointerdown', (e) => { 
+                if (e.target.closest('button')) return;
+                isDraggingResponseModal = true; 
+                draggableResponseHeader.setPointerCapture(e.pointerId); 
+                responseModalDragStartY = e.clientY;
+                const currentTransform = window.getComputedStyle(responseModal).transform;
+                responseModalInitialTranslateY = new DOMMatrix(currentTransform).m42;
+                
+                responseModal.style.transition = 'none'; 
+                responseOverlayRM.style.transition = 'none';
+            });
+            
+            document.addEventListener('pointermove', (e) => { 
+                if (!isDraggingResponseModal) return; 
+                let newTranslateY = responseModalInitialTranslateY + (e.clientY - responseModalDragStartY);
+                if (newTranslateY < 0) newTranslateY = 0; 
+                
+                responseModal.style.transform = `translateY(${newTranslateY}px)`;
+
+                // === PERBAIKAN: Opacity modal dan overlay diubah saat di-drag ===
+                const dragProgress = Math.min(1, newTranslateY / responseModal.offsetHeight);
+                const newOpacity = 1 - dragProgress;
+                responseModal.style.opacity = newOpacity;
+                responseOverlayRM.style.opacity = newOpacity;
+            });
+            
+            document.addEventListener('pointerup', (e) => { 
+                if (!isDraggingResponseModal) return; 
+                isDraggingResponseModal = false; 
+                draggableResponseHeader.releasePointerCapture(e.pointerId);
+                
+                // === PERBAIKAN: Mengaktifkan kembali transisi untuk animasi tutup atau kembali ===
+                responseModal.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease-out';
+                responseOverlayRM.style.transition = 'opacity 0.3s ease, visibility 0s 0.3s linear, background-color 0.3s ease';
+                
+                const currentTransform = window.getComputedStyle(responseModal).transform;
+                const currentTranslateY = new DOMMatrix(currentTransform).m42;
+                
+                // === PERBAIKAN: Jika ditarik lebih dari 30% ke bawah, tutup modal ===
+                if (currentTranslateY > responseModal.offsetHeight * 0.3) {
+                    closeResponseModal();
+                } else { 
+                    // Jika tidak, kembalikan ke posisi semula dengan animasi
+                    responseModal.style.transform = 'translateY(0%)'; 
+                    responseModal.style.opacity = '1';
+                    responseOverlayRM.style.opacity = '1';
+                }
+            });
+
+            showResultsBtn.addEventListener('click', openResponseModal);
+            responseOverlayRM.addEventListener('click', closeResponseModal);
+            
+            function resetToInitialChatView() { 
+                closeResponseModal(); 
+                responsePromptView.style.display = 'none'; 
+                loadingView.style.display = 'none'; 
+                initialViewEl.style.display = 'flex'; 
+                chatInput.value = ''; 
+                chatInput.dispatchEvent(new Event('input')); 
+                submitBtn.disabled = true; 
+                currentApiResponseText = ""; 
+            }
+            modalAskAgainBtn.addEventListener('click', resetToInitialChatView);
+            
+            copyResponseBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(modalApiResponseContent.innerText).then(() => {
+                    const originalIcon = copyResponseBtn.innerHTML; copyResponseBtn.innerHTML = '<i class="fi fi-sr-check"></i>';
+                    setTimeout(() => { copyResponseBtn.innerHTML = originalIcon; }, 1500);
+                });
+            });
+            
+            reportIssueBtn.addEventListener('click', () => {
+                const originalIcon = reportIssueBtn.innerHTML;
+                reportIssueBtn.innerHTML = '<i class="fi fi-sr-check"></i>';
+                reportIssueBtn.disabled = true;
+                setTimeout(() => {
+                    reportIssueBtn.innerHTML = originalIcon;
+                    reportIssueBtn.disabled = false;
+                }, 2000);
+            });
+
+            submitBtn.disabled = true;
+
+            const initialViewWrapper = document.getElementById('initial-view-wrapper');
+            const scrollPromptContainer = document.getElementById('scroll-prompt-container');
+            const scrollPromptProgressBar = document.getElementById('scroll-prompt-progress-bar');
+            const pinContainer = document.getElementById('pin-container');
+            const scrollRevealContainer = document.getElementById('scroll-reveal-container');
+            const scrollTimeline = document.getElementById('scroll-timeline');
+            const scrollRevealFixedUI = document.getElementById('scroll-reveal-fixed-ui');
+            const scenes = document.querySelectorAll('.scroll-scene');
+            
+            const fpsCounterEl = document.getElementById('fps-counter');
+            const recordingTimerEl = document.getElementById('recording-timer');
+
+            const SCROLL_DURATION_TEXT_SCENE_EACH = window.innerHeight * 4.0; 
+            const SCROLL_DURATION_CARDS_SCENE = window.innerHeight * 12.0;
+
+            let sceneData = [];
+            let recordingStartTime = null;
+            let timerInterval = null;
+            let TOTAL_SCROLL_DURATION = 0;
+            
+            const cardStackConfig = { yOffsetBetweenCards: 10, scaleFactorBehind: 0.05, };
+            function vh_to_px(vh_value) { return (vh_value / 100) * window.innerHeight; }
+
+            function tokenizeText(elements) {
+                let words = [];
+                elements.forEach(element => {
+                    if (!element) return;
+                    const textContent = element.textContent.trim();
+                    element.innerHTML = ''; 
+                    const textSegments = textContent.split(/(\s+)/); 
+                    textSegments.forEach(segment => {
+                        if (segment.trim().length > 0) { 
+                            const span = document.createElement('span');
+                            span.textContent = segment;
+                            span.classList.add('word-token');
+                            words.push(span);
+                            element.appendChild(span);
+                        } else { element.appendChild(document.createTextNode(segment)); }
+                    });
+                });
+                return words;
+            }
+            
+            function initializeScrollReveal() {
+                sceneData = []; 
+                let cumulativeDuration = 0;
+                scenes.forEach((scene) => {
+                    let words = [], featureCards = [], headingWords = [], subtextWords = [];
+                    let duration;
+                    const sceneType = scene.dataset.scene;
+
+                    if (sceneType === 'cards') {
+                        duration = SCROLL_DURATION_CARDS_SCENE;
+                        featureCards = Array.from(scene.querySelectorAll('.feature-card'));
+                        headingWords = tokenizeText([scene.querySelector('.scene-heading')]);
+                        subtextWords = tokenizeText([scene.querySelector('.scene-subtext')]);
+                    } else {
+                        duration = SCROLL_DURATION_TEXT_SCENE_EACH;
+                        words = tokenizeText([scene.querySelector('.scene-heading'), scene.querySelector('.scene-subtext')]);
+                    }
+
+                    sceneData.push({
+                        element: scene, type: sceneType, words, headingWords, subtextWords, featureCards,
+                        duration, startScroll: cumulativeDuration, endScroll: cumulativeDuration + duration,
+                    });
+                    cumulativeDuration += duration;
+                });
+                
+                TOTAL_SCROLL_DURATION = cumulativeDuration;
+                if(pinContainer) pinContainer.style.height = `${TOTAL_SCROLL_DURATION + window.innerHeight}px`;
+            }
+
+            function handleScrollReveal() {
+                const scrollY = window.scrollY;
+                if (!pinContainer) return; 
+                
+                if (responseModal.classList.contains('show')) {
+                    closeResponseModal();
+                }
+                
+                const pinContainerTopAbs = pinContainer.offsetTop; 
+                const isPinned = scrollY >= pinContainerTopAbs && scrollY < (pinContainerTopAbs + TOTAL_SCROLL_DURATION);
+                
+                if (isPinned) {
+                    if (!recordingStartTime) startRecording();
+                    initialViewWrapper.classList.add('fade-out');
+                    scrollPromptContainer.classList.add('fade-out');
+                    scrollRevealContainer.classList.add('show');
+                    scrollTimeline.classList.add('show');
+                    scrollRevealFixedUI.classList.add('show');
+                    fpsCounterEl.classList.add('show');
+                    recordingTimerEl.classList.add('show');
+                    
+                    if (isWordAnimationActive) {
+                        isWordAnimationActive = false; 
+                        clearTimeout(wordAnimationTimeout);
+                    }
+                    const scrollWithinPin = Math.max(0, scrollY - pinContainerTopAbs);
+                    let activeSceneIndex = sceneData.findIndex(data => scrollWithinPin >= data.startScroll && scrollWithinPin < data.endScroll);
+                    
+                    updateScenesState(scrollWithinPin, activeSceneIndex);
+                    updateTimeline(true, scrollWithinPin);
+
+                } else { 
+                    if (recordingStartTime) stopRecording();
+                    
+                    if (scrollY < pinContainerTopAbs) {
+                        initialViewWrapper.classList.remove('fade-out');
+                        scrollPromptContainer.classList.remove('fade-out');
+                        if (!isWordAnimationActive) {
+                           isWordAnimationActive = true;
+                           if (heroMainTitleContainer && heroMainTitleContainer.offsetParent !== null) animateHeroTitleWords();
+                        }
+                    } else if (scrollY >= (pinContainerTopAbs + TOTAL_SCROLL_DURATION)) {
+                        initialViewWrapper.classList.add('fade-out');
+                        scrollPromptContainer.classList.add('fade-out');
+                        scrollRevealContainer.classList.add('show');
+                        scrollTimeline.classList.add('show');
+                        scrollRevealFixedUI.classList.add('show');
+                        updateScenesState(TOTAL_SCROLL_DURATION, sceneData.length - 1);
+                        updateTimeline(true, TOTAL_SCROLL_DURATION);
+                    }
+
+                    if (!isPinned && scrollY < (pinContainerTopAbs + TOTAL_SCROLL_DURATION)) {
+                        scrollRevealContainer.classList.remove('show');
+                        scrollTimeline.classList.remove('show');
+                        scrollRevealFixedUI.classList.remove('show');
+                        fpsCounterEl.classList.remove('show');
+                        recordingTimerEl.classList.remove('show');
+                        updateTimeline(false, 0);
+                    }
+                    
+                    const progressToPin = Math.min(1, Math.max(0, scrollY / (pinContainerTopAbs || 1)));
+                    if (scrollPromptProgressBar) scrollPromptProgressBar.style.width = `${progressToPin * 100}%`;
+                }
+            }
+
+            function updateScenesState(scrollWithinPin, activeSceneIndex) {
+                sceneData.forEach((data, index) => {
+                    const isActive = index === activeSceneIndex;
+                    data.element.classList.toggle('active', isActive);
+                    if (!isActive) return;
+
+                    const localProgress = Math.min(1, Math.max(0, (scrollWithinPin - data.startScroll) / data.duration));
+                    
+                    if (data.type !== 'cards') {
+                        const wordsToReveal = Math.floor(data.words.length * localProgress);
+                        data.words.forEach((span, wordIndex) => {
+                            span.classList.toggle('is-word-revealed', wordIndex < wordsToReveal);
+                        });
+                    } else { 
+                        const HEADING_END_PROGRESS = 0.20;
+                        const SUBTEXT_END_PROGRESS = 0.40;
+                        const CARDS_START_PROGRESS = 0.40;
+
+                        const headingProgress = Math.min(1, localProgress / HEADING_END_PROGRESS);
+                        const headingWordsToReveal = Math.floor(data.headingWords.length * headingProgress);
+                        data.headingWords.forEach((span, i) => span.classList.toggle('is-word-revealed', i < headingWordsToReveal));
+
+                        let subtextProgress = (localProgress > HEADING_END_PROGRESS) ? Math.min(1, (localProgress - HEADING_END_PROGRESS) / (SUBTEXT_END_PROGRESS - HEADING_END_PROGRESS)) : 0;
+                        const subtextWordsToReveal = Math.floor(data.subtextWords.length * subtextProgress);
+                        data.subtextWords.forEach((span, i) => span.classList.toggle('is-word-revealed', i < subtextWordsToReveal));
+
+                        let cardsOverallProgress = (localProgress > CARDS_START_PROGRESS) ? (localProgress - CARDS_START_PROGRESS) / (1 - CARDS_START_PROGRESS) : 0;
+                        const numCards = data.featureCards.length;
+                        data.featureCards.forEach((card, cardIndex) => {
+                            if (cardsOverallProgress <= 0) {
+                                card.style.opacity = 0;
+                                card.style.transform = `translateX(-50%) translateY(70vh) scale(0.6)`;
+                                return;
+                            }
+                            const cardStartProgressPoint = cardIndex / numCards * 0.8;
+                            let progressWithinCardAnimation = (cardsOverallProgress - cardStartProgressPoint) / (1 / numCards);
+                            progressWithinCardAnimation = Math.min(1, Math.max(0, progressWithinCardAnimation));
+
+                            const easedEnterProgress = 1 - Math.pow(1 - progressWithinCardAnimation, 4);
+                            const entryY = vh_to_px(70), entryScale = 0.5;
+                            const stackDepth = (numCards - 1) - cardIndex; 
+                            const targetYInStack = (stackDepth * cardStackConfig.yOffsetBetweenCards * -1) + vh_to_px(10);
+                            const targetScaleInStack = 1 - (stackDepth * cardStackConfig.scaleFactorBehind);
+                            
+                            const currentY = entryY + (targetYInStack - entryY) * easedEnterProgress;
+                            const currentScale = entryScale + (targetScaleInStack - entryScale) * easedEnterProgress;
+                            
+                            let targetRotation = [7, -7, 12, -12, 0][cardIndex] || 0;
+                            const isSettled = easedEnterProgress >= 0.99;
+                            card.classList.toggle('is-settled', isSettled);
+                            
+                            const currentRot = isSettled ? targetRotation : 0;
+                            card.style.opacity = progressWithinCardAnimation > 0.01 ? 1 : 0;
+                            card.style.transform = `translateX(-50%) translateY(${currentY}px) rotate(${currentRot}deg) scale(${currentScale})`;
+                            card.style.zIndex = cardIndex + 1; 
+                        });
+                    }
+                });
+            }
+
+            function updateTimeline(isPinnedCurrently, scrollWithinPin) {
+                const checkpoints = [document.getElementById('timeline-cp-1'), document.getElementById('timeline-cp-2'), document.getElementById('timeline-cp-3')];
+                const bars = [document.getElementById('timeline-bar-1'), document.getElementById('timeline-bar-2')];
+                if (checkpoints.some(el => !el) || bars.some(el => !el)) return;
+                
+                checkpoints.forEach(cp => { cp.classList.remove('active', 'active-glow'); });
+                bars.forEach(bar => bar.style.width = '0%');
+
+                if (!isPinnedCurrently) {
+                    if (window.scrollY < (pinContainer.offsetTop || 0)) {
+                        checkpoints[0].classList.add('active', 'active-glow');
+                    }
+                    return;
+                }
+                
+                if(sceneData.length < 4) return;
+                const textScenesEndScroll = sceneData[2].endScroll;
+                const cardsSceneStartScroll = sceneData[3].startScroll;
+                const cardsSceneEndScroll = sceneData[3].endScroll;
+
+                checkpoints[0].classList.add('active');
+                if(scrollWithinPin < textScenesEndScroll) {
+                    checkpoints[0].classList.add('active-glow');
+                }
+
+                const progressToCp2 = Math.min(1, scrollWithinPin / textScenesEndScroll);
+                bars[0].style.width = `${progressToCp2 * 100}%`;
+                if(scrollWithinPin >= textScenesEndScroll) {
+                    checkpoints[1].classList.add('active');
+                    if (scrollWithinPin < cardsSceneEndScroll) {
+                        checkpoints[1].classList.add('active-glow');
+                    }
+                }
+                
+                if(scrollWithinPin >= cardsSceneStartScroll) {
+                    const progressToCp3 = Math.min(1, (scrollWithinPin - cardsSceneStartScroll) / (cardsSceneEndScroll - cardsSceneStartScroll));
+                    bars[1].style.width = `${progressToCp3 * 100}%`;
+                    if(progressToCp3 >= 1) {
+                         checkpoints[2].classList.add('active', 'active-glow');
+                    }
+                }
+            }
+            
+            function fpsLoop() {
+                const now = performance.now();
+                while (fpsTimes.length > 0 && fpsTimes[0] <= now - 1000) fpsTimes.shift();
+                fpsTimes.push(now);
+                if(fpsCounterEl) fpsCounterEl.textContent = `FPS [ ${fpsTimes.length} ]`;
+                requestAnimationFrame(fpsLoop);
+            }
+            const fpsTimes = [];
+            function startRecording() { 
+                if (recordingStartTime) return; recordingStartTime = Date.now();
+                timerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+                    const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+                    const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+                    const s = String(elapsed % 60).padStart(2, '0');
+                    if(recordingTimerEl) recordingTimerEl.textContent = `REC ${h}:${m}:${s}`;
+                }, 1000);
+            }
+            function stopRecording() { 
+                if (!recordingStartTime) return; clearInterval(timerInterval);
+                recordingStartTime = null; timerInterval = null;
+                if(recordingTimerEl) recordingTimerEl.textContent = 'REC 00:00:00';
+            }
+            
+            createHeroTitleWords(); 
+            initializeScrollReveal(); 
+            fpsLoop(); 
+            requestAnimationFrame(handleScrollReveal); 
+            
+            window.addEventListener('scroll', () => requestAnimationFrame(handleScrollReveal));
+            window.addEventListener('resize', () => {
+                initializeScrollReveal(); 
+                requestAnimationFrame(handleScrollReveal); 
+            });
+            
+            if (window.scrollY === 0 && heroMainTitleContainer && heroMainTitleContainer.offsetParent !== null) {
+                setTimeout(() => { if (isWordAnimationActive) animateHeroTitleWords(); }, 300);
+            }
+        });
+    </script>
+</body>
+</html>
