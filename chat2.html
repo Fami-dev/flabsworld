@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate AI Model Tester - Pollinations.ai</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --surface-color: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --error-color: #dc3545;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 25px;
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: var(--text-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; }
+        input[type="text"], input[type="number"], input[type="url"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        textarea { resize: vertical; min-height: 120px; }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .parameters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 18px;
+            background-color: #e9ecef;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .result-box.error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .loading { text-align: center; padding: 25px; font-style: italic; color: var(--secondary-color); }
+        .hidden { display: none; }
+        audio { width: 100%; margin-top: 15px; }
+        .radio-group label { display: inline-block; margin-right: 15px; font-weight: normal; }
+        .file-upload-wrapper { border: 2px dashed var(--border-color); padding: 15px; border-radius: 6px; text-align: center; cursor: pointer; }
+        .file-upload-wrapper:hover { border-color: var(--primary-color); }
+        .file-name { font-style: italic; color: var(--secondary-color); margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Ultimate AI Model Tester</h1>
+        <p>Antarmuka ini beradaptasi penuh dengan kemampuan setiap model, termasuk upload file.</p>
+
+        <section id="multimodal" class="api-section">
+            <form id="main-form">
+                <div class="form-group">
+                    <label for="model-select">Pilih Model</label>
+                    <select id="model-select" name="model" required></select>
+                </div>
+
+                <!-- AUDIO MODEL SECTION -->
+                <div id="audio-mode-group" class="form-group hidden">
+                    <label>Mode Audio</label>
+                    <div class="radio-group">
+                        <input type="radio" id="tts-mode" name="audio_mode" value="tts" checked> <label for="tts-mode">Text-to-Speech</label>
+                        <input type="radio" id="stt-mode" name="audio_mode" value="stt"> <label for="stt-mode">Speech-to-Text</label>
+                    </div>
+                </div>
+                
+                <!-- VISION MODEL SECTION -->
+                <div id="vision-mode-group" class="form-group hidden">
+                    <label>Mode Input Gambar</label>
+                    <div class="radio-group">
+                        <input type="radio" id="vision-url-mode" name="vision_mode" value="url" checked> <label for="vision-url-mode">Gunakan URL</label>
+                        <input type="radio" id="vision-upload-mode" name="vision_mode" value="upload"> <label for="vision-upload-mode">Upload Gambar</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="user-prompt">Prompt Teks</label>
+                    <textarea id="user-prompt" required placeholder="Tulis prompt Anda di sini..."></textarea>
+                </div>
+
+                <!-- DYNAMIC INPUTS -->
+                <div id="image-url-input-group" class="form-group hidden">
+                    <label for="image-url">URL Gambar</label>
+                    <input type="url" id="image-url" placeholder="https://example.com/image.png">
+                </div>
+                <div id="image-upload-input-group" class="form-group hidden">
+                    <label for="image-upload">Upload File Gambar</label>
+                    <input type="file" id="image-upload" accept="image/*" class="hidden">
+                    <div class="file-upload-wrapper" onclick="document.getElementById('image-upload').click();">Klik untuk memilih gambar</div>
+                    <div id="image-file-name" class="file-name"></div>
+                </div>
+                 <div id="audio-upload-input-group" class="form-group hidden">
+                    <label for="audio-upload">Upload File Audio</label>
+                    <input type="file" id="audio-upload" accept="audio/*" class="hidden">
+                    <div class="file-upload-wrapper" onclick="document.getElementById('audio-upload').click();">Klik untuk memilih file audio</div>
+                    <div id="audio-file-name" class="file-name"></div>
+                </div>
+
+                <h2>Parameter Lanjutan</h2>
+                <div class="parameters">
+                    <div id="voices-group" class="form-group hidden">
+                        <label for="voice-select">Pilihan Suara</label>
+                        <select id="voice-select" name="voice"></select>
+                    </div>
+                    <!-- Other parameters can be added here if needed -->
+                </div>
+
+                <button type="submit">Hasilkan Respons</button>
+            </form>
+            
+            <div id="result-container">
+                <div id="text-result" class="result-box hidden"></div>
+                <audio id="audio-result" class="hidden" controls></audio>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modelsData = [{"name":"deepseek","description":"DeepSeek V3.1","reasoning":true,"supportsSystemMessages":true,"input_modalities":["text"],"output_modalities":["text"]},{"name":"gemini","description":"Gemini 2.5 Flash Lite","vision":true,"supportsSystemMessages":true,"input_modalities":["text","image"],"output_modalities":["text"]},{"name":"gemini-search","description":"Gemini 2.5 Flash Lite with Google Search","vision":true,"supportsSystemMessages":true,"input_modalities":["text","image"],"output_modalities":["text"]},{"name":"mistral","description":"Mistral Small 3.2 24B","supportsSystemMessages":true,"input_modalities":["text"],"output_modalities":["text"]},{"name":"openai","description":"OpenAI GPT-5 Nano","vision":true,"supportsSystemMessages":true,"input_modalities":["text","image"],"output_modalities":["text"]},{"name":"openai-audio","description":"OpenAI GPT-4o Mini Audio Preview","vision":true,"audio":true,"voices":["alloy","echo","fable","onyx","nova","shimmer"],"supportsSystemMessages":true,"input_modalities":["text","image","audio"],"output_modalities":["audio","text"]},{"name":"openai-fast","description":"OpenAI GPT-4.1 Nano","vision":true,"supportsSystemMessages":true,"input_modalities":["text","image"],"output_modalities":["text"]},{"name":"openai-large","description":"OpenAI GPT-5 Chat","vision":true,"supportsSystemMessages":true,"input_modalities":["text","image"],"output_modalities":["text"]},{"name":"openai-reasoning","description":"OpenAI o4 Mini","vision":true,"reasoning":true,"supportsSystemMessages":false,"input_modalities":["text","image"],"output_modalities":["text"]},{"name":"qwen-coder","description":"Qwen 2.5 Coder 32B","supportsSystemMessages":true,"input_modalities":["text"],"output_modalities":["text"]},{"name":"roblox-rp","description":"Llama 3.1 8B Instruct","supportsSystemMessages":true,"input_modalities":["text"],"output_modalities":["text"]},{"name":"bidara","description":"BIDARA (by NASA)","vision":true,"supportsSystemMessages":true,"input_modalities":["text","image"],"output_modalities":["text"]},{"name":"chickytutor","description":"ChickyTutor AI Language Tutor","supportsSystemMessages":true,"input_modalities":["text"],"output_modalities":["text"]},{"name":"evil","description":"Evil","vision":true,"uncensored":true,"supportsSystemMessages":true,"input_modalities":["text","image"],"output_modalities":["text"]},{"name":"midijourney","description":"MIDIjourney","supportsSystemMessages":true,"input_modalities":["text"],"output_modalities":["text"]},{"name":"rtist","description":"Rtist","supportsSystemMessages":true,"input_modalities":["text"],"output_modalities":["text"]},{"name":"unity","description":"Unity Unrestricted Agent","vision":true,"uncensored":true,"supportsSystemMessages":true,"input_modalities":["text","image"],"output_modalities":["text"]}];
+
+            // --- DOM Elements & State ---
+            const mainForm = document.getElementById('main-form');
+            const modelSelect = document.getElementById('model-select');
+            const audioModeGroup = document.getElementById('audio-mode-group');
+            const visionModeGroup = document.getElementById('vision-mode-group');
+            const userPrompt = document.getElementById('user-prompt');
+            const imageUrlInputGroup = document.getElementById('image-url-input-group');
+            const imageUploadInputGroup = document.getElementById('image-upload-input-group');
+            const audioUploadInputGroup = document.getElementById('audio-upload-input-group');
+            const voicesGroup = document.getElementById('voices-group');
+            const voiceSelect = document.getElementById('voice-select');
+            const textResultBox = document.getElementById('text-result');
+            const audioResultPlayer = document.getElementById('audio-result');
+            const imageUpload = document.getElementById('image-upload');
+            const audioUpload = document.getElementById('audio-upload');
+
+            let uploadedImageBase64 = null;
+            let uploadedAudioBase64 = null;
+
+            // --- UI Update Logic ---
+            const updateFormUI = () => {
+                const modelName = modelSelect.value;
+                const model = modelsData.find(m => m.name === modelName);
+                if (!model) return;
+
+                const isAudioModel = model.name === 'openai-audio';
+                const isVisionModel = model.vision;
+                const audioMode = isAudioModel ? document.querySelector('input[name="audio_mode"]:checked').value : null;
+                const visionMode = isVisionModel ? document.querySelector('input[name="vision_mode"]:checked').value : null;
+
+                // Show/hide main mode groups
+                audioModeGroup.classList.toggle('hidden', !isAudioModel);
+                visionModeGroup.classList.toggle('hidden', !isVisionModel || isAudioModel); // Hide vision if audio model is active for simplicity
+
+                // Show/hide specific inputs
+                voicesGroup.classList.toggle('hidden', !isAudioModel || audioMode !== 'tts');
+                audioUploadInputGroup.classList.toggle('hidden', !isAudioModel || audioMode !== 'stt');
+                
+                const showVisionInputs = isVisionModel && !isAudioModel;
+                imageUrlInputGroup.classList.toggle('hidden', !showVisionInputs || visionMode !== 'url');
+                imageUploadInputGroup.classList.toggle('hidden', !showVisionInputs || visionMode !== 'upload');
+
+                // Update prompts
+                if (isAudioModel && audioMode === 'stt') {
+                    userPrompt.placeholder = "Tulis prompt opsional di sini, misal: 'Transkripsikan audio ini ke Bahasa Indonesia.'";
+                } else {
+                    userPrompt.placeholder = "Tulis prompt Anda di sini...";
+                }
+            };
+            
+            // --- File Handling ---
+            const handleFileUpload = (file, type) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    if (type === 'image') {
+                        uploadedImageBase64 = e.target.result;
+                        document.getElementById('image-file-name').textContent = `File: ${file.name}`;
+                    } else if (type === 'audio') {
+                        uploadedAudioBase64 = e.target.result.split(',')[1]; // Remove data URL prefix
+                        document.getElementById('audio-file-name').textContent = `File: ${file.name}`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+
+            imageUpload.addEventListener('change', (e) => handleFileUpload(e.target.files[0], 'image'));
+            audioUpload.addEventListener('change', (e) => handleFileUpload(e.target.files[0], 'audio'));
+
+            // --- Initial Setup ---
+            const initialize = () => {
+                modelsData.forEach(model => {
+                    const option = new Option(`${model.name} (${model.description})`, model.name);
+                    modelSelect.appendChild(option);
+                });
+                const audioModel = modelsData.find(m => m.name === 'openai-audio');
+                if (audioModel && audioModel.voices) {
+                    voiceSelect.innerHTML = '';
+                    audioModel.voices.forEach(voice => {
+                        voiceSelect.appendChild(new Option(voice.charAt(0).toUpperCase() + voice.slice(1), voice));
+                    });
+                }
+                modelSelect.value = 'openai';
+                updateFormUI();
+            };
+
+            [modelSelect, ...document.querySelectorAll('input[name="audio_mode"]'), ...document.querySelectorAll('input[name="vision_mode"]')].forEach(el => {
+                el.addEventListener('change', updateFormUI);
+            });
+
+            // --- Form Submission ---
+            mainForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const modelName = modelSelect.value;
+                const selectedModel = modelsData.find(m => m.name === modelName);
+                const audioMode = selectedModel.name === 'openai-audio' ? document.querySelector('input[name="audio_mode"]:checked').value : null;
+                const visionMode = selectedModel.vision ? document.querySelector('input[name="vision_mode"]:checked').value : null;
+                
+                const isTTS = audioMode === 'tts';
+                const isSTT = audioMode === 'stt';
+
+                // Reset UI
+                textResultBox.classList.add('hidden');
+                audioResultPlayer.classList.add('hidden');
+                textResultBox.classList.remove('error');
+                textResultBox.innerHTML = '<div class="loading">Memproses permintaan...</div>';
+                textResultBox.classList.remove('hidden');
+
+                // --- Build Request Body ---
+                const body = { model: modelName, messages: [] };
+                const userContent = [];
+
+                // 1. Add Text part
+                userContent.push({ type: 'text', text: userPrompt.value });
+
+                // 2. Add Image part (if any)
+                if (selectedModel.vision && !isTTS && !isSTT) {
+                    if (visionMode === 'url' && document.getElementById('image-url').value) {
+                        userContent.push({ type: 'image_url', image_url: { url: document.getElementById('image-url').value } });
+                    } else if (visionMode === 'upload' && uploadedImageBase64) {
+                        userContent.push({ type: 'image_url', image_url: { url: uploadedImageBase64 } });
+                    }
+                }
+                
+                // 3. Add Audio part (for STT)
+                if (isSTT) {
+                    if (!uploadedAudioBase64) {
+                        textResultBox.textContent = 'Error: Silakan upload file audio untuk transkripsi.';
+                        textResultBox.classList.add('error');
+                        return;
+                    }
+                    const format = audioUpload.files[0].name.split('.').pop();
+                    userContent.push({ type: 'input_audio', input_audio: { data: uploadedAudioBase64, format: format } });
+                }
+
+                body.messages.push({ role: 'user', content: userContent });
+
+                // Add TTS specific parameters
+                if (isTTS) {
+                    body.voice = voiceSelect.value;
+                }
+
+                // --- Execute Fetch ---
+                try {
+                    const response = await fetch('https://text.pollinations.ai/openai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(`HTTP ${response.status}: ${errorData.details?.error?.message || errorData.error || response.statusText}`);
+                    }
+
+                    if (isTTS) {
+                        const audioBlob = await response.blob();
+                        audioResultPlayer.src = URL.createObjectURL(audioBlob);
+                        audioResultPlayer.classList.remove('hidden');
+                        textResultBox.classList.add('hidden');
+                    } else {
+                        const json = await response.json();
+                        textResultBox.textContent = json.choices[0]?.message?.content || JSON.stringify(json, null, 2);
+                    }
+
+                } catch (error) {
+                    textResultBox.textContent = `Terjadi Kesalahan:\n\n${error.message}`;
+                    textResultBox.classList.add('error');
+                }
+            });
+
+            initialize();
+        });
+    </script>
+</body>
+</html>
